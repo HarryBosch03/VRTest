@@ -10,22 +10,25 @@ namespace Code.Scripts.Player
     [DisallowMultipleComponent]
     public sealed class PlayerHand : MonoBehaviour
     {
-        private const float CollisionStepDistance = 0.05f;
-
         [SerializeField] private Chirality chirality;
-        [SerializeField] private float handCollisionSize;
-        [SerializeField] private float pickupRange;
+        [SerializeField] private float handCollisionSize = 0.05f;
+        [SerializeField] private float pickupRange = 0.2f;
+        [SerializeField] private float throwForceScale = 1.0f;
+        [SerializeField] private float attractionForce = 5.0f;
 
         private InputAction
-            grabAction;
+            grabAction,
+            attractAction;
 
         private VRPickup.AnchorBinding currentBinding;
 
         private Vector3 position;
         private Quaternion rotation;
-        private Collider collider;
+        private new Collider collider;
 
-        private static readonly List<System.Type> CollisionIgnoreComponents = new List<System.Type>()
+        private LineRenderer lines;
+
+        private static readonly List<Type> CollisionIgnoreComponents = new()
         {
             typeof(PlayerHand),
         };
@@ -35,7 +38,7 @@ namespace Code.Scripts.Player
             binding = "<XRController>{" + (chirality == Chirality.Left ? "LeftHand" : "RightHand") + "}/" + binding;
             var action = new InputAction(binding: binding, interactions: "Press(behavior=2)");
             action.Enable();
-            action.performed += ctx => callback(ctx.ReadValueAsButton());
+            if (callback != null) action.performed += ctx => callback(ctx.ReadValueAsButton());
             return action;
         }
 
@@ -45,15 +48,28 @@ namespace Code.Scripts.Player
             collider.radius = handCollisionSize;
             collider.isTrigger = true;
             this.collider = collider;
-            
+
             grabAction = Action("gripPressed", OnGrab);
+            attractAction = Action("primaryButton", OnAttract);
+
+            lines = GetComponentInChildren<LineRenderer>();
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             var target = transform.parent;
             MoveTo(target.position, target.rotation);
 
+            if (lines.enabled)
+            {
+                var ray = new Ray(transform.position, -transform.up);
+                var p = Physics.Raycast(ray, out var hit) ? hit.point : ray.GetPoint(100.0f);
+                lines.SetPosition(1, transform.InverseTransformPoint(p));
+            }
+        }
+
+        private void LateUpdate()
+        {
             transform.position = position;
             transform.rotation = rotation;
         }
@@ -68,9 +84,17 @@ namespace Code.Scripts.Player
             return false;
         }
 
-        private bool CheckPosition()
+        public bool FilterHit(Component hit)
         {
-            var res = false;
+            if (hit.transform.IsChildOf(transform)) return true;
+            if (IgnoreComponent(hit)) return true;
+            if (currentBinding != null && hit.transform.IsChildOf(currentBinding.pickup.transform)) return true;
+
+            return false;
+        }
+
+        private void CheckPosition()
+        {
             for (var i = 0; i < 6; i++)
             {
                 var bounds = collider.bounds;
@@ -81,8 +105,7 @@ namespace Code.Scripts.Player
                 var collisions = 0;
                 foreach (var other in broadPhase)
                 {
-                    if (other.transform.IsChildOf(transform)) continue;
-                    if (IgnoreComponent(other)) continue;
+                    if (FilterHit(other)) continue;
 
                     if (!Physics.ComputePenetration(collider, position, rotation, other, other.transform.position,
                             other.transform.rotation, out var direction, out var depth)) continue;
@@ -91,25 +114,22 @@ namespace Code.Scripts.Player
                     collisions++;
                 }
 
-                if (collisions == 0) return res;
-                
-                Debug.Log(collisions);
-            
+                if (collisions == 0) return;
+
                 position += offset;
-                res = true;
             }
-            return res;
         }
 
         private void MoveTo(Vector3 target, Quaternion rotation)
         {
-            this.rotation = rotation;
-            do
+            var offset = target - position;
+            const float step = 0.02f;
+
+            for (var p = 0.0f; p <= 1.0f + step / 2.0f; p += step)
             {
-                position += (target - position).normalized * CollisionStepDistance;
-                if ((target - position).sqrMagnitude < CollisionStepDistance * CollisionStepDistance) position = target;
-                if (CheckPosition()) return;
-            } while ((target - position).sqrMagnitude > CollisionStepDistance * CollisionStepDistance);
+                position += offset * step;
+                CheckPosition();
+            }
         }
 
         public enum Chirality
@@ -118,21 +138,38 @@ namespace Code.Scripts.Player
             Right,
         }
 
+        private void Bind(VRPickup pickup)
+        {
+            var handle = pickup.GetClosestAnchor(transform.position);
+            currentBinding = new VRPickup.AnchorBinding(pickup, transform, handle);
+            pickup.ActiveBinding = currentBinding;
+        }
+
         private void OnGrab(bool state)
         {
-            var renderer = GetComponentInChildren<Renderer>();
-            renderer.material.color = state ? Color.green : Color.red;
-            
-            currentBinding?.Clear();
+            currentBinding?.Throw(throwForceScale);
+
             if (!state) return;
-            
-            var pickup = VRPickup.GetPickup(e => 1.0f / (e.transform.position - transform.position).magnitude, 1.0f / pickupRange);
+
+            var pickup = VRPickup.GetPickup(e => 1.0f / (e.transform.position - transform.position).magnitude,
+                1.0f / pickupRange);
+
+            if (!pickup)
+            {
+                if (attractAction.ReadValue<float>() < 0.5f) return;
+                
+                var ray = new Ray(transform.position, -transform.up);
+                if (!Physics.Raycast(ray, out var hit)) return;
+                pickup = hit.transform.GetComponentInParent<VRPickup>();
+            }
             if (!pickup) return;
 
-            var handle = pickup.GetClosestAnchor(transform.position);
-            if (!handle) return;
-            currentBinding = new VRPickup.AnchorBinding(transform, handle);
-            pickup.ActiveBinding = currentBinding;
+            Bind(pickup);
+        }
+        
+        private void OnAttract(bool state)
+        {
+            lines.enabled = state;
         }
     }
 }
