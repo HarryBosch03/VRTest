@@ -8,7 +8,7 @@ namespace Code.Scripts.Interactions
     [DisallowMultipleComponent]
     public sealed class VRPickup : MonoBehaviour
     {
-        private const int ThrowSamples = 4;
+        private const int ThrowSamples = 10;
         
         private readonly List<Transform> anchors = new();
 
@@ -76,9 +76,9 @@ namespace Code.Scripts.Interactions
             return res;
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            ActiveBinding?.Update();
+            ActiveBinding?.LateUpdate();
         }
 
         private void FixedUpdate()
@@ -88,29 +88,33 @@ namespace Code.Scripts.Interactions
 
         public class AnchorBinding
         {
-            public readonly Transform target;
+            private const bool DebugThrow = false;
+
+            public readonly Func<Pose> target;
             public readonly Transform anchor;
             public readonly VRPickup pickup;
             public bool active;
 
             private readonly List<Vector3> lastPositions = new();
 
+            private static readonly List<GameObject> TmpDebug = new();
+
             public AnchorBinding(VRPickup pickup, Transform target, Transform anchor)
             {
                 this.pickup = pickup;
-                this.target = target;
+                this.target = () => new Pose(target.position, target.rotation);
                 this.anchor = anchor;
                 active = true;
                 
                 pickup.Rigidbody.isKinematic = true;
             }
 
-            public void Update()
+            public void LateUpdate()
             {
                 if (!active) return;
 
-                anchor.position = target.position;
-                anchor.rotation = target.rotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
+                anchor.position = target().position;
+                anchor.rotation = target().rotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
             }
 
             public void FixedUpdate()
@@ -121,6 +125,27 @@ namespace Code.Scripts.Interactions
                 while (lastPositions.Count > ThrowSamples) lastPositions.RemoveAt(0);
             }
 
+            public void Debug()
+            {
+                if (!DebugThrow) return;
+                
+                foreach (var obj in TmpDebug)
+                {
+                    Destroy(obj);
+                }
+                TmpDebug.Clear();
+
+                for (var i = 0; i < lastPositions.Count; i++)
+                {
+                    var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    Destroy(go.GetComponent<Collider>());
+
+                    go.transform.position = lastPositions[i];
+                    go.transform.localScale = Vector3.one * 0.05f;
+                    TmpDebug.Add(go);
+                }
+            }
+            
             public void Throw(float throwForceScale)
             {
                 if (!active) return;
@@ -131,11 +156,19 @@ namespace Code.Scripts.Interactions
 
                 var force = Vector3.zero;
                 lastPositions.Add(anchor.position);
+
+                var tw = 0.0f;
                 for (var i = 1; i < lastPositions.Count; i++)
                 {
-                    force += (lastPositions[i] - lastPositions[i - 1]) / Time.deltaTime;
+                    var v = lastPositions[i] - lastPositions[i - 1];
+                    var w = v.magnitude;
+                    
+                    force += v * w / Time.deltaTime;
+                    tw += w;
                 }
-                force /= lastPositions.Count;
+                force /= tw;
+
+                Debug();
                 
                 force *= Mathf.Min(1.0f, throwForceScale / rb.mass);
                 force -= rb.velocity;

@@ -16,14 +16,16 @@ namespace Code.Scripts.Player
         [SerializeField] private float throwForceScale = 1.0f;
         [SerializeField] private float attractionForce = 5.0f;
 
-        private InputAction
-            grabAction,
-            attractAction;
+        private InputAction attractAction;
+        
+        private readonly List<GameObject> lastCollisionIgnores = new();
+        private readonly List<GameObject> collisionIgnores = new();
 
         private VRPickup.AnchorBinding currentBinding;
 
-        private Vector3 position;
-        private Quaternion rotation;
+        private Vector3 position, lastPosition;
+        private Quaternion rotation, lastRotation;
+
         private new Collider collider;
 
         private LineRenderer lines;
@@ -49,7 +51,7 @@ namespace Code.Scripts.Player
             collider.isTrigger = true;
             this.collider = collider;
 
-            grabAction = Action("gripPressed", OnGrab);
+            Action("gripPressed", OnGrab);
             attractAction = Action("primaryButton", OnAttract);
 
             lines = GetComponentInChildren<LineRenderer>();
@@ -57,6 +59,9 @@ namespace Code.Scripts.Player
 
         private void FixedUpdate()
         {
+            lastPosition = position;
+            lastRotation = rotation;
+
             var target = transform.parent;
             MoveTo(target.position, target.rotation);
 
@@ -68,10 +73,12 @@ namespace Code.Scripts.Player
             }
         }
 
-        private void LateUpdate()
+        private void Update()
         {
-            transform.position = position;
-            transform.rotation = rotation;
+            var t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+
+            transform.position = Vector3.Lerp(lastPosition, position, t);
+            transform.rotation = Quaternion.Slerp(lastRotation, rotation, t);
         }
 
         private static bool IgnoreComponent(Component other)
@@ -93,6 +100,17 @@ namespace Code.Scripts.Player
             return false;
         }
 
+        public bool IsOnIgnoreList(Transform other)
+        {
+            foreach (var ignore in lastCollisionIgnores)
+            {
+                if (!other.IsChildOf(ignore.transform)) continue;
+                collisionIgnores.Add(ignore);
+                return true;
+            }
+            return false;
+        }
+        
         private void CheckPosition()
         {
             for (var i = 0; i < 6; i++)
@@ -110,8 +128,17 @@ namespace Code.Scripts.Player
                     if (!Physics.ComputePenetration(collider, position, rotation, other, other.transform.position,
                             other.transform.rotation, out var direction, out var depth)) continue;
 
-                    offset += direction * depth;
-                    collisions++;
+                    if (IsOnIgnoreList(other.transform)) continue;
+                    
+                    if (other.attachedRigidbody && !other.attachedRigidbody.isKinematic)
+                    {
+                        other.attachedRigidbody.position -= direction * depth;
+                    }
+                    else
+                    {
+                        offset += direction * depth;
+                        collisions++;
+                    }
                 }
 
                 if (collisions == 0) return;
@@ -125,6 +152,10 @@ namespace Code.Scripts.Player
             var offset = target - position;
             const float step = 0.02f;
 
+            lastCollisionIgnores.Clear();
+            lastCollisionIgnores.AddRange(collisionIgnores);
+            collisionIgnores.Clear();
+            
             for (var p = 0.0f; p <= 1.0f + step / 2.0f; p += step)
             {
                 position += offset * step;
@@ -147,7 +178,11 @@ namespace Code.Scripts.Player
 
         private void OnGrab(bool state)
         {
-            currentBinding?.Throw(throwForceScale);
+            if (currentBinding != null)
+            {
+                currentBinding.Throw(throwForceScale);
+                collisionIgnores.Add(currentBinding.pickup.gameObject);
+            }
 
             if (!state) return;
 
@@ -157,16 +192,17 @@ namespace Code.Scripts.Player
             if (!pickup)
             {
                 if (attractAction.ReadValue<float>() < 0.5f) return;
-                
+
                 var ray = new Ray(transform.position, -transform.up);
                 if (!Physics.Raycast(ray, out var hit)) return;
                 pickup = hit.transform.GetComponentInParent<VRPickup>();
             }
+
             if (!pickup) return;
 
             Bind(pickup);
         }
-        
+
         private void OnAttract(bool state)
         {
             lines.enabled = state;
