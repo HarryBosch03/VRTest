@@ -76,11 +76,6 @@ namespace Code.Scripts.Interactions
             return res;
         }
 
-        private void LateUpdate()
-        {
-            ActiveBinding?.LateUpdate();
-        }
-
         private void FixedUpdate()
         {
             ActiveBinding?.FixedUpdate();
@@ -90,31 +85,37 @@ namespace Code.Scripts.Interactions
         {
             private const bool DebugThrow = false;
 
-            public readonly Func<Pose> target;
             public readonly Transform anchor;
             public readonly VRPickup pickup;
+            public readonly float bindTime;
             public bool active;
 
             private readonly List<Vector3> lastPositions = new();
 
             private static readonly List<GameObject> TmpDebug = new();
 
-            public AnchorBinding(VRPickup pickup, Transform target, Transform anchor)
+            public Vector3 Position
             {
+                get => anchor.position;
+                set => anchor.position = value;
+            }
+
+            public Quaternion Rotation
+            {
+                get => anchor.rotation;
+                set => anchor.rotation = value;
+            }
+            
+            public AnchorBinding(VRPickup pickup, Transform anchor)
+            {
+                if (pickup.ActiveBinding) pickup.ActiveBinding.active = false;
+                
                 this.pickup = pickup;
-                this.target = () => new Pose(target.position, target.rotation);
                 this.anchor = anchor;
+                bindTime = Time.time;
                 active = true;
                 
                 pickup.Rigidbody.isKinematic = true;
-            }
-
-            public void LateUpdate()
-            {
-                if (!active) return;
-
-                anchor.position = target().position;
-                anchor.rotation = target().rotation * Quaternion.Euler(90.0f, 0.0f, 0.0f);
             }
 
             public void FixedUpdate()
@@ -157,24 +158,43 @@ namespace Code.Scripts.Interactions
                 var force = Vector3.zero;
                 lastPositions.Add(anchor.position);
 
-                var tw = 0.0f;
-                for (var i = 1; i < lastPositions.Count; i++)
+                if (lastPositions.Count > 1)
                 {
-                    var v = lastPositions[i] - lastPositions[i - 1];
-                    var w = v.magnitude;
-                    
-                    force += v * w / Time.deltaTime;
-                    tw += w;
+                    var tw = 0.0f;
+                    for (var i = 1; i < lastPositions.Count; i++)
+                    {
+                        var v = lastPositions[i] - lastPositions[i - 1];
+                        var w = v.magnitude;
+
+                        force += v * w / Time.deltaTime;
+                        tw += w;
+                    }
+
+                    force /= tw;
+
+                    force *= Mathf.Min(1.0f, throwForceScale / rb.mass);
+                    force -= rb.velocity;
+                    rb.AddForceAtPosition(force * throwForceScale, anchor.position, ForceMode.VelocityChange);
                 }
-                force /= tw;
 
                 Debug();
                 
-                force *= Mathf.Min(1.0f, throwForceScale / rb.mass);
-                force -= rb.velocity;
-                rb.AddForceAtPosition(force * throwForceScale, anchor.position, ForceMode.VelocityChange);
-                
                 active = false;
+            }
+
+            public bool Valid()
+            {
+                if (!active) return false;
+                
+                if (!anchor) return false;
+                if (!pickup) return false;
+                
+                return true;
+            }
+            
+            public static implicit operator bool(AnchorBinding binding)
+            {
+                return binding != null && binding.Valid();
             }
         }
     }

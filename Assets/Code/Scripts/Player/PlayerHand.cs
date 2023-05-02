@@ -14,17 +14,23 @@ namespace Code.Scripts.Player
         [SerializeField] private float handCollisionSize = 0.05f;
         [SerializeField] private float pickupRange = 0.2f;
         [SerializeField] private float throwForceScale = 1.0f;
-        [SerializeField] private float attractionForce = 5.0f;
+        [SerializeField] private float detachedBindingAcceleration = 5.0f;
 
         private InputAction attractAction;
-        
+
+        private Transform pointRef;
+
         private readonly List<GameObject> lastCollisionIgnores = new();
         private readonly List<GameObject> collisionIgnores = new();
 
         private VRPickup.AnchorBinding currentBinding;
+        private bool detachedBinding;
+        private float detachedBindingSpeed;
 
         private Vector3 position, lastPosition;
         private Quaternion rotation, lastRotation;
+
+        private Vector3 velocity;
 
         private new Collider collider;
 
@@ -34,6 +40,9 @@ namespace Code.Scripts.Player
         {
             typeof(PlayerHand),
         };
+
+        public Vector3 Forward => -transform.up;
+        public Vector3 PointDirection => pointRef ? pointRef.forward : Forward;
 
         private InputAction Action(string binding, Action<bool> callback)
         {
@@ -55,6 +64,8 @@ namespace Code.Scripts.Player
             attractAction = Action("primaryButton", OnAttract);
 
             lines = GetComponentInChildren<LineRenderer>();
+
+            pointRef = transform.DeepFind("Point Ref");
         }
 
         private void FixedUpdate()
@@ -67,7 +78,7 @@ namespace Code.Scripts.Player
 
             if (lines.enabled)
             {
-                var ray = new Ray(transform.position, -transform.up);
+                var ray = new Ray(transform.position, PointDirection);
                 var p = Physics.Raycast(ray, out var hit) ? hit.point : ray.GetPoint(100.0f);
                 lines.SetPosition(1, transform.InverseTransformPoint(p));
             }
@@ -79,6 +90,31 @@ namespace Code.Scripts.Player
 
             transform.position = Vector3.Lerp(lastPosition, position, t);
             transform.rotation = Quaternion.Slerp(lastRotation, rotation, t);
+        }
+
+        private void LateUpdate()
+        {
+            UpdateBinding();
+        }
+
+        private void UpdateBinding()
+        {
+            if (!currentBinding) return;
+
+            if (detachedBinding)
+            {
+                detachedBindingSpeed += detachedBindingAcceleration * Time.deltaTime;
+                currentBinding.Position += (position - currentBinding.Position).normalized * (detachedBindingSpeed * Time.deltaTime);
+                if ((currentBinding.Position - position).magnitude < detachedBindingSpeed * Time.deltaTime * 1.1f)
+                {
+                    detachedBinding = false;
+                }
+                
+                return;
+            }
+
+            currentBinding.Position = position;
+            currentBinding.Rotation = rotation;
         }
 
         private static bool IgnoreComponent(Component other)
@@ -95,7 +131,7 @@ namespace Code.Scripts.Player
         {
             if (hit.transform.IsChildOf(transform)) return true;
             if (IgnoreComponent(hit)) return true;
-            if (currentBinding != null && hit.transform.IsChildOf(currentBinding.pickup.transform)) return true;
+            if (currentBinding && hit.transform.IsChildOf(currentBinding.pickup.transform)) return true;
 
             return false;
         }
@@ -108,58 +144,72 @@ namespace Code.Scripts.Player
                 collisionIgnores.Add(ignore);
                 return true;
             }
+
             return false;
         }
-        
-        private void CheckPosition()
+
+        private void CheckPosition(List<Rigidbody> dirtyList)
         {
-            for (var i = 0; i < 6; i++)
+            var bounds = collider.bounds;
+            var broadPhase = Physics.OverlapBox(bounds.center - transform.position + position,
+                bounds.extents + Vector3.one * 0.1f, rotation);
+
+            var offset = Vector3.zero;
+            var collisions = 0;
+            foreach (var other in broadPhase)
             {
-                var bounds = collider.bounds;
-                var broadPhase = Physics.OverlapBox(bounds.center - transform.position + position,
-                    bounds.extents + Vector3.one * 0.1f, rotation);
+                if (FilterHit(other)) continue;
 
-                var offset = Vector3.zero;
-                var collisions = 0;
-                foreach (var other in broadPhase)
+                if (!Physics.ComputePenetration(collider, position, rotation, other, other.transform.position,
+                        other.transform.rotation, out var direction, out var depth)) continue;
+
+                if (IsOnIgnoreList(other.transform)) continue;
+
+                if (other.attachedRigidbody && !other.attachedRigidbody.isKinematic)
                 {
-                    if (FilterHit(other)) continue;
+                    if (dirtyList.Contains(other.attachedRigidbody)) continue;
 
-                    if (!Physics.ComputePenetration(collider, position, rotation, other, other.transform.position,
-                            other.transform.rotation, out var direction, out var depth)) continue;
+                    other.transform.position -= direction * depth;
 
-                    if (IsOnIgnoreList(other.transform)) continue;
-                    
-                    if (other.attachedRigidbody && !other.attachedRigidbody.isKinematic)
-                    {
-                        other.attachedRigidbody.position -= direction * depth;
-                    }
-                    else
-                    {
-                        offset += direction * depth;
-                        collisions++;
-                    }
+                    var p = position - direction * handCollisionSize;
+                    var relVelocity = other.attachedRigidbody.velocity - velocity;
+                    var dot = Vector3.Dot(direction, relVelocity);
+                    if (dot < 0.0f) continue;
+                    var force = -direction * dot;
+                    other.attachedRigidbody.AddForceAtPosition(force, p, ForceMode.VelocityChange);
+
+                    dirtyList.Add(other.attachedRigidbody);
                 }
-
-                if (collisions == 0) return;
-
-                position += offset;
+                else
+                {
+                    offset += direction * depth;
+                    collisions++;
+                }
             }
+
+            if (collisions == 0) return;
+
+            position += offset;
         }
 
         private void MoveTo(Vector3 target, Quaternion rotation)
         {
+            this.rotation = rotation;
+            velocity = (target - position) / Time.deltaTime;
+
             var offset = target - position;
             const float step = 0.02f;
 
             lastCollisionIgnores.Clear();
             lastCollisionIgnores.AddRange(collisionIgnores);
             collisionIgnores.Clear();
-            
+
+            var dirtyList = new List<Rigidbody>();
+
             for (var p = 0.0f; p <= 1.0f + step / 2.0f; p += step)
             {
                 position += offset * step;
-                CheckPosition();
+                CheckPosition(dirtyList);
             }
         }
 
@@ -169,10 +219,11 @@ namespace Code.Scripts.Player
             Right,
         }
 
-        private void Bind(VRPickup pickup)
+        private void Bind(VRPickup pickup, bool detached)
         {
             var handle = pickup.GetClosestAnchor(transform.position);
-            currentBinding = new VRPickup.AnchorBinding(pickup, transform, handle);
+            currentBinding = new VRPickup.AnchorBinding(pickup, handle);
+            detachedBinding = detached;
             pickup.ActiveBinding = currentBinding;
         }
 
@@ -182,6 +233,7 @@ namespace Code.Scripts.Player
             {
                 currentBinding.Throw(throwForceScale);
                 collisionIgnores.Add(currentBinding.pickup.gameObject);
+                detachedBindingSpeed = 0.0f;
             }
 
             if (!state) return;
@@ -193,14 +245,15 @@ namespace Code.Scripts.Player
             {
                 if (attractAction.ReadValue<float>() < 0.5f) return;
 
-                var ray = new Ray(transform.position, -transform.up);
+                var ray = new Ray(transform.position, PointDirection);
                 if (!Physics.Raycast(ray, out var hit)) return;
                 pickup = hit.transform.GetComponentInParent<VRPickup>();
+                if (!pickup) return;
+                Bind(pickup, true);
+                return;
             }
 
-            if (!pickup) return;
-
-            Bind(pickup);
+            Bind(pickup, false);
         }
 
         private void OnAttract(bool state)
