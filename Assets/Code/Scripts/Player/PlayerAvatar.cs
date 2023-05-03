@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Code.Scripts.Player
+namespace Player
 {
     [SelectionBase]
     [DisallowMultipleComponent]

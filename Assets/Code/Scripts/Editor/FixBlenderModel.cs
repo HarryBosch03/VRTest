@@ -1,10 +1,13 @@
 using UnityEditor;
 
-public sealed class FixBlenderModel : AssetPostprocessor
+namespace Editor
 {
-    private void OnPreprocessModel()
+    public sealed class FixBlenderModel : AssetPostprocessor
     {
-        var importer = assetImporter as ModelImporter;
-        importer.bakeAxisConversion = true;
+        private void OnPreprocessModel()
+        {
+            var importer = assetImporter as ModelImporter;
+            importer.bakeAxisConversion = true;
+        }
     }
 }

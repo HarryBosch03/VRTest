@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Code.Scripts.Interactions;
+using Interactions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Code.Scripts.Player
+namespace Player
 {
     [SelectionBase]
     [DisallowMultipleComponent]
@@ -23,7 +23,7 @@ namespace Code.Scripts.Player
         private readonly List<GameObject> lastCollisionIgnores = new();
         private readonly List<GameObject> collisionIgnores = new();
 
-        private VRPickup.AnchorBinding currentBinding;
+        private VRBinding currentBinding;
         private bool detachedBinding;
         private float detachedBindingSpeed;
 
@@ -35,11 +35,6 @@ namespace Code.Scripts.Player
         private new Collider collider;
 
         private LineRenderer lines;
-
-        private static readonly List<Type> CollisionIgnoreComponents = new()
-        {
-            typeof(PlayerHand),
-        };
 
         public Vector3 Forward => -transform.up;
         public Vector3 PointDirection => pointRef ? pointRef.forward : Forward;
@@ -86,8 +81,14 @@ namespace Code.Scripts.Player
 
         private void Update()
         {
+            if (currentBinding && currentBinding.bindable is VRHandle handle)
+            {
+                transform.position = handle.HandPosition;
+                transform.rotation = handle.HandRotation;
+                return;
+            }
+            
             var t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-
             transform.position = Vector3.Lerp(lastPosition, position, t);
             transform.rotation = Quaternion.Slerp(lastRotation, rotation, t);
         }
@@ -117,21 +118,10 @@ namespace Code.Scripts.Player
             currentBinding.Rotation = rotation;
         }
 
-        private static bool IgnoreComponent(Component other)
-        {
-            foreach (var type in CollisionIgnoreComponents)
-            {
-                if (other.GetComponentInParent(type)) return true;
-            }
-
-            return false;
-        }
-
         public bool FilterHit(Component hit)
         {
             if (hit.transform.IsChildOf(transform)) return true;
-            if (IgnoreComponent(hit)) return true;
-            if (currentBinding && hit.transform.IsChildOf(currentBinding.pickup.transform)) return true;
+            if (currentBinding && hit.transform.IsChildOf(currentBinding.bindable.transform)) return true;
 
             return false;
         }
@@ -165,26 +155,8 @@ namespace Code.Scripts.Player
 
                 if (IsOnIgnoreList(other.transform)) continue;
 
-                if (other.attachedRigidbody && !other.attachedRigidbody.isKinematic)
-                {
-                    if (dirtyList.Contains(other.attachedRigidbody)) continue;
-
-                    other.transform.position -= direction * depth;
-
-                    var p = position - direction * handCollisionSize;
-                    var relVelocity = other.attachedRigidbody.velocity - velocity;
-                    var dot = Vector3.Dot(direction, relVelocity);
-                    if (dot < 0.0f) continue;
-                    var force = -direction * dot;
-                    other.attachedRigidbody.AddForceAtPosition(force, p, ForceMode.VelocityChange);
-
-                    dirtyList.Add(other.attachedRigidbody);
-                }
-                else
-                {
-                    offset += direction * depth;
-                    collisions++;
-                }
+                offset += direction * depth;
+                collisions++;
             }
 
             if (collisions == 0) return;
@@ -219,10 +191,12 @@ namespace Code.Scripts.Player
             Right,
         }
 
-        private void Bind(VRPickup pickup, bool detached)
+        private void Bind(VRBindable pickup, bool detached)
         {
+            if (detached && !pickup.CanCreateDetachedBinding) return;
+            
             var handle = pickup.GetClosestAnchor(transform.position);
-            currentBinding = new VRPickup.AnchorBinding(pickup, handle);
+            currentBinding = new VRBinding(pickup, this, handle);
             detachedBinding = detached;
             pickup.ActiveBinding = currentBinding;
         }
@@ -232,28 +206,28 @@ namespace Code.Scripts.Player
             if (currentBinding != null)
             {
                 currentBinding.Throw(throwForceScale);
-                collisionIgnores.Add(currentBinding.pickup.gameObject);
+                collisionIgnores.Add(currentBinding.bindable.gameObject);
                 detachedBindingSpeed = 0.0f;
             }
 
             if (!state) return;
 
-            var pickup = VRPickup.GetPickup(e => 1.0f / (e.transform.position - transform.position).magnitude,
-                1.0f / pickupRange);
-
-            if (!pickup)
+            VRBindable pickup;
+            if (attractAction.ReadValue<float>() > 0.5f)
             {
-                if (attractAction.ReadValue<float>() < 0.5f) return;
-
                 var ray = new Ray(transform.position, PointDirection);
                 if (!Physics.Raycast(ray, out var hit)) return;
-                pickup = hit.transform.GetComponentInParent<VRPickup>();
+                pickup = hit.transform.GetComponentInParent<VRBindable>();
                 if (!pickup) return;
                 Bind(pickup, true);
-                return;
             }
-
-            Bind(pickup, false);
+            else
+            {
+                pickup = VRBindable.GetPickup(e => 1.0f / (e.transform.position - transform.position).magnitude,
+                    1.0f / pickupRange);
+                if (!pickup) return;
+                Bind(pickup, false);
+            }
         }
 
         private void OnAttract(bool state)
