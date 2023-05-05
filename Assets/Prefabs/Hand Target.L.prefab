@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2558520464810095240}
-  - component: {fileID: 1850768495702990745}
+  - component: {fileID: 7026952096727773964}
   m_Layer: 0
   m_Name: Thumb.3
   m_TagString: Untagged
@@ -33,8 +33,8 @@ Transform:
   m_Father: {fileID: 2626313230986267753}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -12.616572, y: -0.000013227879, z: 0.000003025443}
---- !u!64 &1850768495702990745
-MeshCollider:
+--- !u!65 &7026952096727773964
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -43,10 +43,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 3527156518495157697, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.013407328, y: 0.029591557, z: 0.012737212}
+  m_Center: {x: 0, y: 0.014795776, z: 0.0000000023283064}
 --- !u!1 &385024710070633826
 GameObject:
   m_ObjectHideFlags: 0
@@ -56,7 +55,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4469743912117747607}
-  - component: {fileID: 415667790670929032}
+  - component: {fileID: 125828790836160826}
   m_Layer: 0
   m_Name: Finger.3.2
   m_TagString: Untagged
@@ -80,8 +79,8 @@ Transform:
   m_Father: {fileID: 4278071231751960008}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 4.0711098e-13, y: 0.000013660378, z: -12.622573}
---- !u!64 &415667790670929032
-MeshCollider:
+--- !u!65 &125828790836160826
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -90,10 +89,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -4540527479693754309, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.014560141, y: 0.0226327, z: 0.013832397}
+  m_Center: {x: 0, y: 0.011316348, z: 0.000000003259629}
 --- !u!1 &563829636334580319
 GameObject:
   m_ObjectHideFlags: 0
@@ -103,7 +101,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4278071231751960008}
-  - component: {fileID: 1112376573755518192}
+  - component: {fileID: 2859164787737701390}
   m_Layer: 0
   m_Name: Finger..3.1
   m_TagString: Untagged
@@ -127,8 +125,8 @@ Transform:
   m_Father: {fileID: 5707621480385861427}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -0.0000029851706, y: -0.000013330217, z: -12.622571}
---- !u!64 &1112376573755518192
-MeshCollider:
+--- !u!65 &2859164787737701390
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -137,10 +135,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 6656276593894049365, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.01500991, y: 0.025495853, z: 0.014259692}
+  m_Center: {x: 0, y: 0.012747925, z: 0.0000000037252903}
 --- !u!1 &933710345680739262
 GameObject:
   m_ObjectHideFlags: 0
@@ -182,7 +179,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8571718733376222843}
-  - component: {fileID: 8492342626851112421}
+  - component: {fileID: 2244480568010304452}
   m_Layer: 0
   m_Name: Thumb.1
   m_TagString: Untagged
@@ -206,8 +203,8 @@ Transform:
   m_Father: {fileID: 5707621480385861427}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 23.889883, y: 19.158983, z: 0.00000046688717}
---- !u!64 &8492342626851112421
-MeshCollider:
+--- !u!65 &2244480568010304452
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -216,10 +213,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5918789682906573462, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.018482795, y: 0.026476659, z: 0.017558992}
+  m_Center: {x: 0, y: 0.013238328, z: 0}
 --- !u!1 &1979040585463480194
 GameObject:
   m_ObjectHideFlags: 0
@@ -229,7 +225,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7181291186397385481}
-  - component: {fileID: 542522632097449553}
+  - component: {fileID: 8279534143848476848}
   m_Layer: 0
   m_Name: Finger.1.1
   m_TagString: Untagged
@@ -253,8 +249,8 @@ Transform:
   m_Father: {fileID: 5707621480385861427}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -12.622573}
---- !u!64 &542522632097449553
-MeshCollider:
+--- !u!65 &8279534143848476848
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -263,10 +259,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 7758277591895652828, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.01500991, y: 0.023886744, z: 0.014259689}
+  m_Center: {x: 0, y: 0.01194337, z: 0.0000000034924597}
 --- !u!1 &2292582446659256602
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,7 +271,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2230995882869677013}
-  - component: {fileID: 4986469809783594214}
+  - component: {fileID: 4459597440781521090}
   m_Layer: 0
   m_Name: Finger.1.3
   m_TagString: Untagged
@@ -300,8 +295,8 @@ Transform:
   m_Father: {fileID: 5067383861026941941}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -12.622573}
---- !u!64 &4986469809783594214
-MeshCollider:
+--- !u!65 &4459597440781521090
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -310,10 +305,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 3344573023214022200, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.013407328, y: 0.026696954, z: 0.012737211}
+  m_Center: {x: 0, y: 0.013348475, z: 0.0000000037252903}
 --- !u!1 &2653455161391744301
 GameObject:
   m_ObjectHideFlags: 0
@@ -323,7 +317,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5067383861026941941}
-  - component: {fileID: 2887238990214420803}
+  - component: {fileID: 6059709150961762001}
   m_Layer: 0
   m_Name: Finger.1.2
   m_TagString: Untagged
@@ -347,8 +341,8 @@ Transform:
   m_Father: {fileID: 7181291186397385481}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -12.622574}
---- !u!64 &2887238990214420803
-MeshCollider:
+--- !u!65 &6059709150961762001
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -357,10 +351,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -3558497763689896786, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.014560141, y: 0.021204274, z: 0.013832394}
+  m_Center: {x: 0, y: 0.010602135, z: 0.0000000020954758}
 --- !u!1 &3239059017293948222
 GameObject:
   m_ObjectHideFlags: 0
@@ -401,7 +394,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8055600989198827865}
-  - component: {fileID: 7568372008328834647}
+  - component: {fileID: 5494314239212509670}
   m_Layer: 0
   m_Name: Finger.4.2
   m_TagString: Untagged
@@ -425,8 +418,8 @@ Transform:
   m_Father: {fileID: 7340942781188997344}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -12.622574}
---- !u!64 &7568372008328834647
-MeshCollider:
+--- !u!65 &5494314239212509670
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -435,10 +428,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 6064553468446101704, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.014560141, y: 0.018795174, z: 0.013832396}
+  m_Center: {x: 0, y: 0.009397585, z: 0.000000002561137}
 --- !u!1 &4186856620833936801
 GameObject:
   m_ObjectHideFlags: 0
@@ -448,7 +440,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6690438322888899020}
-  - component: {fileID: 5076863785762978802}
+  - component: {fileID: 5674342501463152997}
   m_Layer: 0
   m_Name: Finger.2.2
   m_TagString: Untagged
@@ -472,8 +464,8 @@ Transform:
   m_Father: {fileID: 5620638096727643237}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -0.0000029851706, y: -0.000013330217, z: -12.622573}
---- !u!64 &5076863785762978802
-MeshCollider:
+--- !u!65 &5674342501463152997
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -482,10 +474,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -7944116839592131012, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.014560141, y: 0.023968231, z: 0.013832398}
+  m_Center: {x: 0, y: 0.011984114, z: 0.0000000030267984}
 --- !u!1 &4302713474046229094
 GameObject:
   m_ObjectHideFlags: 0
@@ -495,7 +486,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4805872866495584489}
-  - component: {fileID: 7500955924030773031}
+  - component: {fileID: 8632887606265195434}
   m_Layer: 0
   m_Name: Finger.2.3
   m_TagString: Untagged
@@ -519,8 +510,8 @@ Transform:
   m_Father: {fileID: 6690438322888899020}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 4.0711098e-13, y: 0.000013660377, z: -12.622572}
---- !u!64 &7500955924030773031
-MeshCollider:
+--- !u!65 &8632887606265195434
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -529,10 +520,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 3193966779658374202, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.013407328, y: 0.030176867, z: 0.012737211}
+  m_Center: {x: 0, y: 0.015088432, z: 0.0000000041909516}
 --- !u!1 &4895310334132834828
 GameObject:
   m_ObjectHideFlags: 0
@@ -542,7 +532,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2626313230986267753}
-  - component: {fileID: 2819635995609288153}
+  - component: {fileID: 5627929355673464358}
   m_Layer: 0
   m_Name: Thumb.2
   m_TagString: Untagged
@@ -566,8 +556,8 @@ Transform:
   m_Father: {fileID: 8571718733376222843}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -13.094531, y: -0.000000117159836, z: 0.000000046917656}
---- !u!64 &2819635995609288153
-MeshCollider:
+--- !u!65 &5627929355673464358
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -576,10 +566,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -2317568008960770542, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.014560141, y: 0.023503345, z: 0.013832393}
+  m_Center: {x: 0, y: 0.01175167, z: 0.000000005122274}
 --- !u!1 &4960632683262996385
 GameObject:
   m_ObjectHideFlags: 0
@@ -620,7 +609,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 778748494309578148}
-  - component: {fileID: 1741169267965459662}
+  - component: {fileID: 4599312733822136682}
   m_Layer: 0
   m_Name: Finger.4.3
   m_TagString: Untagged
@@ -644,8 +633,8 @@ Transform:
   m_Father: {fileID: 8055600989198827865}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -12.622573}
---- !u!64 &1741169267965459662
-MeshCollider:
+--- !u!65 &4599312733822136682
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -654,10 +643,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -8425280570572672250, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.013407328, y: 0.0236638, z: 0.012737203}
+  m_Center: {x: 0, y: 0.011831898, z: 0.000000005355105}
 --- !u!1 &5286786748106629678
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,7 +686,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7340942781188997344}
-  - component: {fileID: 3171954102254979306}
+  - component: {fileID: 4739996428185335567}
   m_Layer: 0
   m_Name: Finger.4.1
   m_TagString: Untagged
@@ -722,8 +710,8 @@ Transform:
   m_Father: {fileID: 5707621480385861427}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -12.622573}
---- !u!64 &3171954102254979306
-MeshCollider:
+--- !u!65 &4739996428185335567
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -732,10 +720,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -4561390577863315663, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.01500991, y: 0.021172855, z: 0.014259685}
+  m_Center: {x: 0, y: 0.010586426, z: 0.0000000020954758}
 --- !u!1 &6075395490774000428
 GameObject:
   m_ObjectHideFlags: 0
@@ -931,7 +918,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8740503834716429455}
-  - component: {fileID: 5744601759299327926}
+  - component: {fileID: 1545743512960815733}
   m_Layer: 0
   m_Name: Finger.3.3
   m_TagString: Untagged
@@ -955,8 +942,8 @@ Transform:
   m_Father: {fileID: 4469743912117747607}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -3.908236e-20, y: -2.0240008e-20, z: -12.622572}
---- !u!64 &5744601759299327926
-MeshCollider:
+--- !u!65 &1545743512960815733
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -965,10 +952,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -9155663605188148454, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.013407328, y: 0.028495375, z: 0.012737209}
+  m_Center: {x: 0, y: 0.014247686, z: 0.0000000030267984}
 --- !u!1 &8408862328630743682
 GameObject:
   m_ObjectHideFlags: 0
@@ -1275,7 +1261,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5620638096727643237}
-  - component: {fileID: 8875762076101373426}
+  - component: {fileID: 307319540534838225}
   m_Layer: 0
   m_Name: Finger.2.1
   m_TagString: Untagged
@@ -1299,8 +1285,8 @@ Transform:
   m_Father: {fileID: 5707621480385861427}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -12.622573}
---- !u!64 &8875762076101373426
-MeshCollider:
+--- !u!65 &307319540534838225
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1309,10 +1295,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 1824222410351456562, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.01500991, y: 0.027000342, z: 0.01425969}
+  m_Center: {x: 0, y: 0.013500169, z: 0.000000003958121}
 --- !u!1 &8770778236843518116
 GameObject:
   m_ObjectHideFlags: 0
@@ -1322,7 +1307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5707621480385861427}
-  - component: {fileID: 5768645182711629529}
+  - component: {fileID: 5130204996549623134}
   m_Layer: 0
   m_Name: Hand
   m_TagString: Untagged
@@ -1350,8 +1335,8 @@ Transform:
   m_Father: {fileID: 1615383579164873204}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -89.98021, y: 0, z: 0}
---- !u!64 &5768645182711629529
-MeshCollider:
+--- !u!65 &5130204996549623134
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1360,7 +1345,6 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -6535056050804908554, guid: 5db99c6a1d778f443a4d9cc1b2b42562, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.018747255, y: 0.09885456, z: 0.07693201}
+  m_Center: {x: 0, y: 0.046576202, z: -0.005902903}
