@@ -1,23 +1,26 @@
 using UnityEditor;
 using UnityEngine;
 
-public static class BoxColliderOfBestFit
+namespace Editor.Automation
 {
-    [MenuItem("Automation/Actions/Box Collider of Best Fit")]
-    public static void Execute()
+    public static class BoxColliderOfBestFit
     {
-        if (Selection.gameObjects == null) return;
-        if (Selection.gameObjects.Length == 0) return;
-
-        foreach (var sel in Selection.gameObjects)
+        [MenuItem("Automation/Actions/Box Collider of Best Fit")]
+        public static void Execute()
         {
-            var mc = sel.GetComponent<MeshCollider>();
-            if (!mc) continue;
+            if (Selection.gameObjects == null) return;
+            if (Selection.gameObjects.Length == 0) return;
 
-            var bounds = mc.sharedMesh.bounds;
-            var bc = sel.AddComponent<BoxCollider>();
-            bc.center = bounds.center;
-            bc.size = bounds.size;
+            foreach (var sel in Selection.gameObjects)
+            {
+                var mc = sel.GetComponent<MeshCollider>();
+                if (!mc) continue;
+
+                var bounds = mc.sharedMesh.bounds;
+                var bc = sel.AddComponent<BoxCollider>();
+                bc.center = bounds.center;
+                bc.size = bounds.size;
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Interactions
         public readonly VRBindable bindable;
         public readonly float bindTime;
         public bool active;
-
+        
         private readonly bool wasKinematic;
 
         private readonly List<Vector3> lastPositions = new();
@@ -34,9 +34,9 @@ namespace Interactions
             set => bindable.SetRotation(value);
         }
         
-        public VRBinding(VRBindable bindable, PlayerHand hand, Transform anchor)
+        public VRBinding(VRBindable bindable, PlayerHand hand, float throwForceScale)
         {
-            if (bindable.ActiveBinding) bindable.ActiveBinding.active = false;
+            if (bindable.ActiveBinding) bindable.ActiveBinding.Throw(throwForceScale);
 
             this.bindable = bindable;
             this.hand = hand;

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public static class Extensions
 {
@@ -30,4 +31,6 @@ public static class Extensions
             
         return null;
     }
+
+    public static bool State(this InputAction action) => action.ReadValue<float>() > 0.5f;
 }

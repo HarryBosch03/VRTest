@@ -1,31 +1,42 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace Player
+namespace Player.Hands
 {
-    public partial class PlayerHand
+    [System.Serializable]
+    public class HandMovement
     {
-        private void InitializeMovement()
+        private PlayerHand hand;
+        
+        private Collider[] colliders;
+        
+        private readonly List<GameObject> lastCollisionIgnores = new();
+
+        public void Init(PlayerHand hand)
         {
-            colliders = GetComponentsInChildren<Collider>();
+            this.hand = hand;
+            
+            colliders = hand.GetComponentsInChildren<Collider>();
             foreach (var collider in colliders) collider.isTrigger = true;
         }
-        
-        private void Move()
+
+        public void Move()
         {
-            lastPosition = position;
-            lastRotation = rotation;
+            hand.lastPosition = hand.position;
+            hand.lastRotation = hand.rotation;
 
-            var target = transform.parent;
+            var target = hand.transform.parent;
 
-            transform.rotation = target.rotation;
+            hand.transform.rotation = target.rotation;
+            hand.rotation = target.rotation;
             MoveTo(target.position);
-            position = transform.position;
+            hand.position = hand.transform.position;
         }
         
         public bool FilterHit(Component hit)
         {
-            if (hit.transform.IsChildOf(transform)) return true;
-            if (currentBinding && hit.transform.IsChildOf(currentBinding.bindable.transform)) return true;
+            if (hit.transform.IsChildOf(hand.transform)) return true;
+            if (hand.currentBinding && hit.transform.IsChildOf(hand.currentBinding.bindable.transform)) return true;
 
             return false;
         }
@@ -35,7 +46,7 @@ namespace Player
             foreach (var ignore in lastCollisionIgnores)
             {
                 if (!other.IsChildOf(ignore.transform)) continue;
-                collisionIgnores.Add(ignore);
+                hand.collisionIgnores.Add(ignore);
                 return true;
             }
 
@@ -45,8 +56,8 @@ namespace Player
         private void MoveTo(Vector3 position)
         {
             lastCollisionIgnores.Clear();
-            lastCollisionIgnores.AddRange(collisionIgnores);
-            collisionIgnores.Clear();
+            lastCollisionIgnores.AddRange(hand.collisionIgnores);
+            hand.collisionIgnores.Clear();
 
             if (colliders.Length == 0) return;
 
@@ -58,13 +69,13 @@ namespace Player
 
             bounds.Expand(0.1f);
 
-            var vec = position - transform.position;
+            var vec = position - hand.transform.position;
             const float step = 0.05f;
             for (var p = 0.0f; p <= 1.0000000001f; p += step)
             {
                 var collided = false;
                 var backstep = 0.0f;
-                var broadPhase = Physics.OverlapBox(bounds.center, bounds.extents, rotation);
+                var broadPhase = Physics.OverlapBox(bounds.center, bounds.extents, hand.rotation);
                 foreach (var other in broadPhase)
                 {
                     foreach (var collider in colliders)
@@ -87,23 +98,23 @@ namespace Player
                         
                         collided = true;
                         backstep = Vector3.Dot(-vec.normalized, direction) * depth;
-                        transform.position += direction * depth;
+                        hand.transform.position += direction * depth;
                     }
                 }
 
                 if (collided)
                 {
-                    transform.position -= (position - transform.position).normalized * backstep;
+                    hand.transform.position -= (position - hand.transform.position).normalized * backstep;
                 }
-                transform.position += vec * step;
+                hand.transform.position += vec * step;
             }
         }
-        
-        private void MovementInterpolation()
+
+        public void MovementInterpolation()
         {
             var t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
-            transform.position = Vector3.Lerp(lastPosition, position, t);
-            transform.rotation = Quaternion.Slerp(lastRotation, rotation, t);
+            hand.transform.position = Vector3.Lerp(hand.lastPosition, hand.position, t);
+            hand.transform.rotation = Quaternion.Slerp(hand.lastRotation, hand.rotation, t);
         }
     }
 }

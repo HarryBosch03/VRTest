@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Input;
 using Interactions;
+using Player.Hands;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,52 +10,62 @@ namespace Player
 {
     [SelectionBase]
     [DisallowMultipleComponent]
-    public sealed partial class PlayerHand : MonoBehaviour
+    public sealed class PlayerHand : MonoBehaviour
     {
         [SerializeField] private Chirality chirality;
-        [SerializeField] private float pickupRange = 0.2f;
-        [SerializeField] private float throwForceScale = 1.0f;
-        [SerializeField] private float detachedBindingAcceleration = 5.0f;
 
-        [Space] [SerializeField] private Chirality defaultHandModelChirality;
-
+        [Space] 
+        [SerializeField] private Chirality defaultHandModelChirality;
         [SerializeField] private Vector3 flipAxis = Vector3.right;
+        
+        [Space]
+        [SerializeField] private HandMovement movement;
+        [SerializeField] private HandBinding binding;
+        [SerializeField] private HandAnimator animator;
 
-        private InputAction attractAction;
+        [HideInInspector] public Vector3 position, lastPosition;
+        [HideInInspector] public Quaternion rotation, lastRotation;
 
+        public readonly List<GameObject> collisionIgnores = new();
+
+        public InputWrapper gripAction;
+        public InputWrapper triggerAction;
+        public InputWrapper attractAction;
+
+        private Action updateInputs;
+        
         private Transform pointRef;
         private Transform handModel;
-
-        private readonly List<GameObject> lastCollisionIgnores = new();
-        private readonly List<GameObject> collisionIgnores = new();
-
-        private VRBinding currentBinding;
-        private bool detachedBinding;
-        private float detachedBindingSpeed;
-
-        private Vector3 position, lastPosition;
-        private Quaternion rotation, lastRotation;
-
-        private Collider[] colliders;
-
-        private LineRenderer lines;
+        public VRBinding currentBinding;
 
         public Vector3 Forward => -transform.up;
         public Vector3 PointDirection => pointRef ? pointRef.forward : Forward;
 
-        private InputAction Action(string binding, Action<bool> callback)
+        public static Action<InputAction.CallbackContext> Switch(System.Action<bool> callback) => ctx => callback(ctx.ReadValueAsButton());
+        
+        public InputWrapper CreateAction(string binding)
         {
             binding = "<XRController>{" + (chirality == Chirality.Left ? "LeftHand" : "RightHand") + "}/" + binding;
-            var action = new InputAction(binding: binding, interactions: "Press(behavior=2)");
-            action.Enable();
-            if (callback != null) action.performed += ctx => callback(ctx.ReadValueAsButton());
+            var action = new InputWrapper(binding: binding, ref updateInputs);
             return action;
+        }
+        
+        public void BindAction(InputAction action, Action<bool> callback)
+        {
+            action.performed += Switch(callback);
         }
 
         private void Awake()
         {
-            InitializeMovement();
-            InitializeBinding();
+            gripAction = CreateAction("grip");
+            attractAction = CreateAction("primaryButton");
+            triggerAction = CreateAction("trigger");
+
+            movement.Init(this);
+            binding.Init(this);
+            animator.Init(this);
+            
+            pointRef = transform.DeepFind("Point Ref");
 
             handModel = transform.DeepFind("Model");
             if (chirality != defaultHandModelChirality)
@@ -62,19 +74,22 @@ namespace Player
 
         private void FixedUpdate()
         {
-            Move();
-            UpdateLines();
+            movement.Move();
+            binding.UpdateLines();
         }
 
         private void Update()
         {
-            if (MoveHandToHandleBinding()) return;
-            MovementInterpolation();
+            updateInputs();
+            
+            if (binding.MoveHandToHandleBinding()) return;
+            movement.MovementInterpolation();
+            animator.Update();
         }
 
         private void LateUpdate()
         {
-            UpdateBinding();
+            binding.UpdateBinding();
         }
 
         public enum Chirality
