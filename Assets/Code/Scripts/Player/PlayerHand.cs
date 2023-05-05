@@ -11,14 +11,18 @@ namespace Player
     public sealed class PlayerHand : MonoBehaviour
     {
         [SerializeField] private Chirality chirality;
-        [SerializeField] private float handCollisionSize = 0.05f;
         [SerializeField] private float pickupRange = 0.2f;
         [SerializeField] private float throwForceScale = 1.0f;
         [SerializeField] private float detachedBindingAcceleration = 5.0f;
 
+        [Space] [SerializeField] private Chirality defaultHandModelChirality;
+
+        [SerializeField] private Vector3 flipAxis = Vector3.right;
+
         private InputAction attractAction;
 
         private Transform pointRef;
+        private Transform handModel;
 
         private readonly List<GameObject> lastCollisionIgnores = new();
         private readonly List<GameObject> collisionIgnores = new();
@@ -30,9 +34,7 @@ namespace Player
         private Vector3 position, lastPosition;
         private Quaternion rotation, lastRotation;
 
-        private Vector3 velocity;
-
-        private new Collider collider;
+        private Collider[] colliders;
 
         private LineRenderer lines;
 
@@ -50,10 +52,7 @@ namespace Player
 
         private void Awake()
         {
-            var collider = gameObject.AddComponent<SphereCollider>();
-            collider.radius = handCollisionSize;
-            collider.isTrigger = true;
-            this.collider = collider;
+            colliders = GetComponentsInChildren<Collider>();
 
             Action("gripPressed", OnGrab);
             attractAction = Action("primaryButton", OnAttract);
@@ -61,6 +60,10 @@ namespace Player
             lines = GetComponentInChildren<LineRenderer>();
 
             pointRef = transform.DeepFind("Point Ref");
+
+            handModel = transform.DeepFind("Model");
+            if (chirality != defaultHandModelChirality)
+                handModel.localScale = Vector3.Reflect(Vector3.one, flipAxis.normalized);
         }
 
         private void FixedUpdate()
@@ -69,7 +72,10 @@ namespace Player
             lastRotation = rotation;
 
             var target = transform.parent;
-            MoveTo(target.position, target.rotation);
+
+            transform.rotation = target.rotation;
+            MoveTo(target.position);
+            position = transform.position;
 
             if (lines.enabled)
             {
@@ -87,7 +93,7 @@ namespace Player
                 transform.rotation = handle.HandRotation;
                 return;
             }
-            
+
             var t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
             transform.position = Vector3.Lerp(lastPosition, position, t);
             transform.rotation = Quaternion.Slerp(lastRotation, rotation, t);
@@ -105,12 +111,13 @@ namespace Player
             if (detachedBinding)
             {
                 detachedBindingSpeed += detachedBindingAcceleration * Time.deltaTime;
-                currentBinding.Position += (position - currentBinding.Position).normalized * (detachedBindingSpeed * Time.deltaTime);
+                currentBinding.Position += (position - currentBinding.Position).normalized *
+                                           (detachedBindingSpeed * Time.deltaTime);
                 if ((currentBinding.Position - position).magnitude < detachedBindingSpeed * Time.deltaTime * 1.1f)
                 {
                     detachedBinding = false;
                 }
-                
+
                 return;
             }
 
@@ -138,50 +145,60 @@ namespace Player
             return false;
         }
 
-        private void CheckPosition(List<Rigidbody> dirtyList)
+        private void MoveTo(Vector3 position)
         {
-            var bounds = collider.bounds;
-            var broadPhase = Physics.OverlapBox(bounds.center - transform.position + position,
-                bounds.extents + Vector3.one * 0.1f, rotation);
-
-            var offset = Vector3.zero;
-            var collisions = 0;
-            foreach (var other in broadPhase)
-            {
-                if (FilterHit(other)) continue;
-
-                if (!Physics.ComputePenetration(collider, position, rotation, other, other.transform.position,
-                        other.transform.rotation, out var direction, out var depth)) continue;
-
-                if (IsOnIgnoreList(other.transform)) continue;
-
-                offset += direction * depth;
-                collisions++;
-            }
-
-            if (collisions == 0) return;
-
-            position += offset;
-        }
-
-        private void MoveTo(Vector3 target, Quaternion rotation)
-        {
-            this.rotation = rotation;
-            velocity = (target - position) / Time.deltaTime;
-
-            var offset = target - position;
-            const float step = 0.02f;
-
             lastCollisionIgnores.Clear();
             lastCollisionIgnores.AddRange(collisionIgnores);
             collisionIgnores.Clear();
 
-            var dirtyList = new List<Rigidbody>();
+            if (colliders.Length == 0) return;
 
-            for (var p = 0.0f; p <= 1.0f + step / 2.0f; p += step)
+            var bounds = colliders[0].bounds;
+            for (var i = 1; i < colliders.Length; i++)
             {
-                position += offset * step;
-                CheckPosition(dirtyList);
+                bounds.Encapsulate(colliders[i].bounds);
+            }
+
+            bounds.Expand(0.1f);
+
+            var vec = position - transform.position;
+            const float step = 0.05f;
+            for (var p = 0.0f; p <= 1.0000000001f; p += step)
+            {
+                var collided = false;
+                var backstep = 0.0f;
+                var broadPhase = Physics.OverlapBox(bounds.center, bounds.extents, rotation);
+                foreach (var other in broadPhase)
+                {
+                    foreach (var collider in colliders)
+                    {
+                        if (FilterHit(other)) continue;
+
+                        if (!Physics.ComputePenetration(collider, collider.transform.position,
+                                collider.transform.rotation,
+                                other, other.transform.position, other.transform.rotation,
+                                out var direction, out var depth)) continue;
+
+                        if (IsOnIgnoreList(other.transform)) continue;
+
+                        if (collider.attachedRigidbody)
+                        {
+                            collider.attachedRigidbody.position -= direction * depth;
+                            collider.attachedRigidbody.AddForce(-direction * depth / Time.deltaTime, ForceMode.VelocityChange);
+                            continue;
+                        }
+                        
+                        collided = true;
+                        backstep = Vector3.Dot(-vec.normalized, direction) * depth;
+                        transform.position += direction * depth;
+                    }
+                }
+
+                if (collided)
+                {
+                    transform.position -= (position - transform.position).normalized * backstep;
+                }
+                transform.position += vec * step;
             }
         }
 
@@ -194,7 +211,7 @@ namespace Player
         private void Bind(VRBindable pickup, bool detached)
         {
             if (detached && !pickup.CanCreateDetachedBinding) return;
-            
+
             var handle = pickup.GetClosestAnchor(transform.position);
             currentBinding = new VRBinding(pickup, this, handle);
             detachedBinding = detached;
