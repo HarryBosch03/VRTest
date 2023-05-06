@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Player;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -7,14 +6,17 @@ namespace Interactions
 {
     public class VRBinding
     {
-        private const int ThrowSamples = 5;
+        private const int ThrowSamples = 3;
 
         private const bool DebugThrow = false;
 
-        public readonly PlayerHand hand;
         public readonly VRBindable bindable;
         public readonly float bindTime;
         public bool active;
+
+        private Vector3 lastPosition;
+        
+        private Vector3 lastValue;
         
         private readonly bool wasKinematic;
 
@@ -34,12 +36,11 @@ namespace Interactions
             set => bindable.SetRotation(value);
         }
         
-        public VRBinding(VRBindable bindable, PlayerHand hand, float throwForceScale)
+        public VRBinding(VRBindable bindable, float throwForceScale)
         {
             if (bindable.ActiveBinding) bindable.ActiveBinding.Throw(throwForceScale);
 
             this.bindable = bindable;
-            this.hand = hand;
             bindTime = Time.time;
             active = true;
 
@@ -53,7 +54,7 @@ namespace Interactions
         {
             if (!active) return;
 
-            lastPositions.Add(bindable.transform.position);
+            lastPositions.Add(bindable.Handle.position);
             while (lastPositions.Count > ThrowSamples) lastPositions.RemoveAt(0);
         }
 
@@ -91,7 +92,7 @@ namespace Interactions
             if (rb.isKinematic) return;
 
             var force = Vector3.zero;
-            lastPositions.Add(bindable.transform.position);
+            lastPositions.Add(bindable.Handle.position);
 
             if (lastPositions.Count > 1)
             {
@@ -99,17 +100,21 @@ namespace Interactions
                 for (var i = 1; i < lastPositions.Count; i++)
                 {
                     var v = lastPositions[i] - lastPositions[i - 1];
-                    var w = v.magnitude;
+                    var w = 1.0f;
 
                     force += v * w / Time.deltaTime;
                     tw += w;
                 }
 
-                force /= tw;
+                if (tw != 0.0f)
+                {
+                    force /= tw;
 
-                force *= Mathf.Min(1.0f, throwForceScale / rb.mass);
-                force -= rb.velocity;
-                rb.AddForceAtPosition(force * throwForceScale, bindable.transform.position, ForceMode.VelocityChange);
+                    force *= Mathf.Min(1.0f, throwForceScale / rb.mass);
+                    force -= rb.velocity;
+                    rb.AddForceAtPosition(force * throwForceScale, bindable.Handle.position,
+                        ForceMode.VelocityChange);
+                }
             }
 
             Debug();
@@ -118,8 +123,6 @@ namespace Interactions
         public bool Valid()
         {
             if (!active) return false;
-
-            if (!hand) return false;
             if (!bindable) return false;
 
             return true;

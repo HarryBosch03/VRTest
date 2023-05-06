@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Interactions
@@ -7,7 +6,9 @@ namespace Interactions
     public abstract class VRBindable : MonoBehaviour
     {
         public Rigidbody Rigidbody { get; private set; }
-        public VRBinding ActiveBinding { get; set; }
+        public VRBinding ActiveBinding { get; private set; }
+        
+        public Transform Handle { get; set; }
         
         private static readonly List<VRBindable> Pickups = new();
 
@@ -16,6 +17,9 @@ namespace Interactions
         protected virtual void Awake()
         {
             Rigidbody = GetComponent<Rigidbody>();
+
+            Handle = transform.DeepFind("Handle");
+            if (!Handle) Handle = transform;
         }
 
         protected virtual void OnEnable()
@@ -28,22 +32,37 @@ namespace Interactions
             Pickups.Remove(this);
         }
         
-        public virtual Vector3 SetPosition(Vector3 position) => transform.position = position;
-        public virtual Quaternion SetRotation(Quaternion rotation) => transform.rotation = rotation;
-        
-        public virtual Transform GetClosestAnchor(Vector3 point) => transform;
+        public virtual void SetPosition(Vector3 position) => transform.position = position;
+        public virtual void SetRotation(Quaternion rotation) => transform.rotation = rotation;
 
-        // Gets the Pickup With the best score, does not return an element if their score is below :threshold:
-        public static VRBindable GetPickup(Func<VRBindable, float> scoringMethod, float threshold = 0.0f)
+        public virtual VRBinding CreateBinding(float throwForce)
+        {
+            return ActiveBinding = new VRBinding(this, throwForce);
+        }
+
+        protected virtual void FixedUpdate()
+        {
+            if (ActiveBinding) ActiveBinding.FixedUpdate();
+        }
+        
+        public static VRBindable GetPickup(Vector3 from, float range)
         {
             VRBindable res = null;
             foreach (var pickup in Pickups)
             {
-                var score = scoringMethod(pickup);
-                if (score < threshold) continue;
-
-                res = pickup;
-                threshold = score;
+                var d1 = (pickup.Handle.position - from).sqrMagnitude;
+                if (d1 > range * range) continue;
+                if (!res)
+                {
+                    res = pickup;
+                    continue;
+                }
+                
+                var d2 = (res.Handle.position - from).sqrMagnitude;
+                if (d1 < d2)
+                {
+                    res = pickup;
+                }
             }
 
             return res;

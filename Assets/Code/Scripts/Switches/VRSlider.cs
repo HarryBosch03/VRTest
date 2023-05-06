@@ -1,13 +1,12 @@
-using System;
 using Interactions;
 using UnityEngine;
 
 namespace Switches
 {
-    public sealed class Slider : VRHandle
+    public sealed class VRSlider : VRHandle
     {
         [SerializeField] private float sliderRange;
-        [SerializeField] private int stops = 0;
+        [SerializeField] private int stops;
         [SerializeField] private float stopSmoothTime = 0.05f;
         [SerializeField] [Range(0.0f, 1.0f)] private float softMovement = 0.1f;
 
@@ -41,15 +40,15 @@ namespace Switches
             handle.position = transform.position + transform.forward * position;
         }
 
-        public override Vector3 SetPosition(Vector3 position)
+        public override void SetPosition(Vector3 position)
         {
             var dot = Vector3.Dot(transform.forward, position) - Vector3.Dot(transform.forward, transform.position);
 
             if (stops > 1) ApplyStops(dot);
             else this.position = dot;
-
-            return handle.position;
         }
+
+        public override void SetRotation(Quaternion rotation) { }
 
         private void ApplyStops(float dot)
         {
@@ -58,11 +57,6 @@ namespace Switches
 
             var d = (p - 0.5f) * sliderRange;
             tPosition = d + (dot - d) * softMovement;
-        }
-
-        public override Quaternion SetRotation(Quaternion rotation)
-        {
-            return handle.rotation;
         }
     }
 }

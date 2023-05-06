@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using Input;
 using Interactions;
 using Player.Hands;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Player
 {
@@ -17,31 +15,28 @@ namespace Player
         [Space] 
         [SerializeField] private Chirality defaultHandModelChirality;
         [SerializeField] private Vector3 flipAxis = Vector3.right;
-        
-        [Space]
+
+        [Space] 
         [SerializeField] private HandMovement movement;
         [SerializeField] private HandBinding binding;
         [SerializeField] private HandAnimator animator;
-
-        [HideInInspector] public Vector3 position, lastPosition;
-        [HideInInspector] public Quaternion rotation, lastRotation;
-
-        public readonly List<GameObject> collisionIgnores = new();
 
         public InputWrapper gripAction;
         public InputWrapper triggerAction;
         public InputWrapper attractAction;
 
-        private Action updateInputs;
-        
-        private Transform pointRef;
-        private Transform handModel;
         public VRBinding currentBinding;
+        public Transform handModel;
 
-        public Vector3 Forward => -transform.up;
-        public Vector3 PointDirection => pointRef ? pointRef.forward : Forward;
+        public bool ignoreLastBindingCollision;
+        
+        private Action updateInputs;
 
-        public static Action<InputAction.CallbackContext> Switch(System.Action<bool> callback) => ctx => callback(ctx.ReadValueAsButton());
+        private Transform pointRef;
+
+        public Transform Target { get; private set; }
+        public Transform PointRef => pointRef ? pointRef : transform;
+        public Collider[] Colliders { get; private set; }
         
         public InputWrapper CreateAction(string binding)
         {
@@ -49,14 +44,14 @@ namespace Player
             var action = new InputWrapper(binding: binding, ref updateInputs);
             return action;
         }
-        
-        public void BindAction(InputAction action, Action<bool> callback)
-        {
-            action.performed += Switch(callback);
-        }
 
         private void Awake()
         {
+            Target = transform.parent;
+            transform.SetParent(null);
+
+            Colliders = GetComponentsInChildren<Collider>();
+            
             gripAction = CreateAction("grip");
             attractAction = CreateAction("primaryButton");
             triggerAction = CreateAction("trigger");
@@ -64,7 +59,7 @@ namespace Player
             movement.Init(this);
             binding.Init(this);
             animator.Init(this);
-            
+
             pointRef = transform.DeepFind("Point Ref");
 
             handModel = transform.DeepFind("Model");
@@ -74,17 +69,23 @@ namespace Player
 
         private void FixedUpdate()
         {
-            movement.Move();
+            movement.MoveTo(Target.position, Target.rotation);
             binding.UpdateLines();
         }
 
         private void Update()
         {
             updateInputs();
-            
-            if (binding.MoveHandToHandleBinding()) return;
-            movement.MovementInterpolation();
-            animator.Update();
+
+            if (currentBinding)
+            {
+                handModel.gameObject.SetActive(binding.DetachedBinding);
+            }
+            else
+            {
+                handModel.gameObject.SetActive(true);
+                animator.Update();
+            }
         }
 
         private void LateUpdate()

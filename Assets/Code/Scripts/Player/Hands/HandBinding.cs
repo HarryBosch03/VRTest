@@ -1,6 +1,5 @@
 using Interactions;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Player.Hands
 {
@@ -12,60 +11,55 @@ namespace Player.Hands
         [SerializeField] private float detachedBindingAcceleration = 5.0f;
 
         private PlayerHand hand;
-        
+
         private LineRenderer lines;
 
-        private bool detachedBinding;
+        public bool DetachedBinding { get; private set; }
         private float detachedBindingSpeed;
 
         public void Init(PlayerHand hand)
         {
             this.hand = hand;
-            
-            lines = hand.GetComponentInChildren<LineRenderer>();
-        }
 
-        public bool MoveHandToHandleBinding()
-        {
-            if (!hand.currentBinding || hand.currentBinding.bindable is not VRHandle handle) return false;
-            
-            hand.transform.position = handle.HandPosition;
-            hand.transform.rotation = handle.HandRotation;
-            return true;
+            lines = hand.GetComponentInChildren<LineRenderer>();
         }
 
         public void UpdateBinding()
         {
             hand.gripAction.WasPressedThisFrame(OnGrip);
-            hand.attractAction.WasPressedThisFrame(OnAttract);
-            
+
             if (!hand.currentBinding) return;
 
-            if (detachedBinding)
+            if (DetachedBinding)
             {
                 detachedBindingSpeed += detachedBindingAcceleration * Time.deltaTime;
-                hand.currentBinding.Position += (hand.position - hand.currentBinding.Position).normalized *
+                hand.currentBinding.Position += (hand.transform.position - hand.currentBinding.Position).normalized *
                                                 (detachedBindingSpeed * Time.deltaTime);
-                if ((hand.currentBinding.Position - hand.position).magnitude < detachedBindingSpeed * Time.deltaTime * 1.1f)
+                if ((hand.currentBinding.Position - hand.transform.position).magnitude <
+                    detachedBindingSpeed * Time.deltaTime * 1.1f)
                 {
-                    detachedBinding = false;
+                    DetachedBinding = false;
                 }
 
                 return;
             }
 
-            hand.currentBinding.Position = hand.position;
-            hand.currentBinding.Rotation = hand.rotation;
+            hand.currentBinding.Position = hand.transform.position;
+            hand.currentBinding.Rotation = hand.transform.rotation;
         }
-        
+
         private void Bind(VRBindable pickup, bool detached)
         {
             if (detached && !pickup.CanCreateDetachedBinding) return;
 
-            var handle = pickup.GetClosestAnchor(hand.transform.position);
-            hand.currentBinding = new VRBinding(pickup, hand, throwForceScale);
-            detachedBinding = detached;
-            pickup.ActiveBinding = hand.currentBinding;
+            if (!hand.ignoreLastBindingCollision)
+            {
+                Utility.IgnoreCollision(pickup.gameObject, hand.gameObject, true);
+                hand.ignoreLastBindingCollision = true;
+            }
+
+            hand.currentBinding = pickup.CreateBinding(throwForceScale);
+            DetachedBinding = detached;
         }
 
         private void OnGrip(bool state)
@@ -73,7 +67,6 @@ namespace Player.Hands
             if (hand.currentBinding != null)
             {
                 hand.currentBinding.Throw(throwForceScale);
-                hand.collisionIgnores.Add(hand.currentBinding.bindable.gameObject);
                 detachedBindingSpeed = 0.0f;
             }
 
@@ -82,7 +75,7 @@ namespace Player.Hands
             VRBindable pickup;
             if (hand.attractAction.action.State())
             {
-                var ray = new Ray(hand.transform.position, hand.PointDirection);
+                var ray = new Ray(hand.PointRef.position, hand.PointRef.forward);
                 if (!Physics.Raycast(ray, out var hit)) return;
                 pickup = hit.transform.GetComponentInParent<VRBindable>();
                 if (!pickup) return;
@@ -90,23 +83,18 @@ namespace Player.Hands
             }
             else
             {
-                pickup = VRBindable.GetPickup(e => 1.0f / (e.transform.position - hand.transform.position).magnitude,
-                    1.0f / pickupRange);
+                pickup = VRBindable.GetPickup(hand.transform.position, pickupRange);
                 if (!pickup) return;
                 Bind(pickup, false);
             }
         }
 
-        private void OnAttract(bool state)
-        {
-            lines.enabled = state;
-        }
-
         public void UpdateLines()
         {
+            lines.enabled = !hand.currentBinding && hand.attractAction.action.State();
             if (!lines.enabled) return;
-            
-            var ray = new Ray(hand.transform.position, hand.PointDirection);
+
+            var ray = new Ray(hand.PointRef.position, hand.PointRef.forward);
             var p = Physics.Raycast(ray, out var hit) ? hit.point : ray.GetPoint(100.0f);
             lines.SetPosition(1, hand.transform.InverseTransformPoint(p));
         }

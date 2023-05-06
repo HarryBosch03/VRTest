@@ -1,24 +1,25 @@
-using System;
 using System.Globalization;
 using TMPro;
 using UnityEngine;
 
-    
-[SelectionBase]
-[DisallowMultipleComponent]
-public sealed class FPSCounter : MonoBehaviour
+namespace UI
 {
-    [SerializeField] private string template;
+    [SelectionBase]
+    [DisallowMultipleComponent]
+    public sealed class FPSCounter : MonoBehaviour
+    {
+        [SerializeField] private string template;
     
-    private TMP_Text text;
+        private TMP_Text text;
 
-    private void Awake()
-    {
-        text = GetComponentInChildren<TMP_Text>();
-    }
+        private void Awake()
+        {
+            text = GetComponentInChildren<TMP_Text>();
+        }
 
-    private void Update()
-    {
-        text.text = string.Format(template, (Mathf.RoundToInt(1.0f / Time.smoothDeltaTime)).ToString(CultureInfo.InvariantCulture));
+        private void Update()
+        {
+            text.text = string.Format(template, (Mathf.RoundToInt(1.0f / Time.smoothDeltaTime)).ToString(CultureInfo.InvariantCulture));
+        }
     }
 }
