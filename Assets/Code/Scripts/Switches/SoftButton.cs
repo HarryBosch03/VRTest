@@ -20,15 +20,14 @@ namespace Switches
         [SerializeField] private float spring = 500.0f;
         [SerializeField] private float damper = 50.0f;
 
-        [Space] 
-        [SerializeField] private bool state;
-
         private Transform actuationBody;
 
         private float lastPosition;
         private float position;
         private float velocity;
         private float acceleration;
+
+        public bool State => position / -actuationDistance > pressPoint; 
 
         private void Awake()
         {
@@ -45,8 +44,6 @@ namespace Switches
 
             Integrate();
             Collide();
-
-            state = -position / actuationDistance > pressPoint;
         }
 
         private void LateUpdate()
@@ -138,8 +135,6 @@ namespace Switches
             position = newPos;
         }
 
-        private Vector3 ButtonPosWorld => transform.TransformPoint(ButtonPos());
-        private Vector3 ButtonPos() => ButtonPos(position);
-        private Vector3 ButtonPos(float p) => Vector3.up * (p - SkinWidth);
+        private static Vector3 ButtonPos(float p) => Vector3.up * (p - SkinWidth);
     }
 }

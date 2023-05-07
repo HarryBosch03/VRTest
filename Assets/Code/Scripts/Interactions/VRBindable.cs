@@ -7,12 +7,10 @@ namespace Interactions
     {
         public Rigidbody Rigidbody { get; private set; }
         public VRBinding ActiveBinding { get; private set; }
-        
-        public Transform Handle { get; set; }
-        
-        private static readonly List<VRBindable> Pickups = new();
 
-        public abstract bool CanCreateDetachedBinding { get; }
+        public Transform Handle { get; set; }
+
+        public static readonly List<VRBindable> All = new();
 
         protected virtual void Awake()
         {
@@ -24,31 +22,29 @@ namespace Interactions
 
         protected virtual void OnEnable()
         {
-            Pickups.Add(this);
+            All.Add(this);
         }
 
         protected virtual void OnDisable()
         {
-            Pickups.Remove(this);
+            All.Remove(this);
         }
-        
+
         public virtual void SetPosition(Vector3 position) => transform.position = position;
         public virtual void SetRotation(Quaternion rotation) => transform.rotation = rotation;
 
-        public virtual VRBinding CreateBinding(float throwForce)
+        public VRBinding CreateBinding(float throwForce)
         {
-            return ActiveBinding = new VRBinding(this, throwForce);
+            return ActiveBinding = new VRBinding(this);
         }
 
-        protected virtual void FixedUpdate()
-        {
-            if (ActiveBinding) ActiveBinding.FixedUpdate();
-        }
-        
+        public virtual void OnBindingActivated() { }
+        public virtual void OnBindingDeactivated() { }
+
         public static VRBindable GetPickup(Vector3 from, float range)
         {
             VRBindable res = null;
-            foreach (var pickup in Pickups)
+            foreach (var pickup in All)
             {
                 var d1 = (pickup.Handle.position - from).sqrMagnitude;
                 if (d1 > range * range) continue;
@@ -57,7 +53,7 @@ namespace Interactions
                     res = pickup;
                     continue;
                 }
-                
+
                 var d2 = (res.Handle.position - from).sqrMagnitude;
                 if (d1 < d2)
                 {

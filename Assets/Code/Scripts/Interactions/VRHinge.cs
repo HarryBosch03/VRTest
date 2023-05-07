@@ -1,87 +1,45 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Interactions
 {
     [SelectionBase]
     [DisallowMultipleComponent]
-    public sealed class VRHinge : VRHandle
+    public sealed class VRHinge : VRBindable
     {
-        private const int MaxDeltaSamples = 3;
+        [SerializeField] private float grabSpring = 25.0f;
+        [SerializeField] private float grabDamper = 5.0f;
 
-        [SerializeField] private Vector3 axis = Vector3.up;
-        [SerializeField] private bool limitAngle;
-        [SerializeField] private float minAngle;
-        [SerializeField] private float maxAngle;
-        [SerializeField] private float hingeDrag = 25.0f;
-
-        [SerializeField] private float minHingeBounce = 0.3f;
-        [SerializeField] private float maxHingeBounce = 0.3f;
-
-        private float angle;
-        private float velocity;
-
-        private readonly List<float> deltaSamples = new();
+        private new Rigidbody rigidbody;
         private bool wasBound;
+        private Vector3? grabTarget;
 
-        public override Vector3 HandPosition => Handle.position;
-        public override Quaternion HandRotation => Handle.rotation;
+        public Vector3 HandPosition => Handle.position;
+        public Quaternion HandRotation => Handle.rotation;
 
-        private Vector3 WorldAxis => transform.parent.TransformDirection(this.axis).normalized;
+        protected override void Awake()
+        {
+            base.Awake();
+
+            rigidbody = gameObject.GetOrAddComponent<Rigidbody>();
+        }
 
         public override void SetPosition(Vector3 position)
         {
-            var axis = WorldAxis;
-            var fwd = (Handle.position - transform.position).normalized;
-            var target = (position - transform.position).normalized;
-
-            var cross = Vector3.Dot(axis, Vector3.Cross(fwd, target));
-
-            var delta = Mathf.Asin(cross) * Mathf.Rad2Deg;
-            deltaSamples.Add(delta);
-            while (deltaSamples.Count > MaxDeltaSamples) deltaSamples.RemoveAt(0);
-            angle += delta;
+            grabTarget = position;
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
-            transform.rotation = Quaternion.AngleAxis(angle, WorldAxis) * transform.parent.rotation;
-        }
+            if (!grabTarget.HasValue) return;
 
-        protected override void FixedUpdate()
-        {
-            base.FixedUpdate();
-
-            if (!ActiveBinding && wasBound && deltaSamples.Count > 0)
-            {
-                var delta = 0.0f;
-                foreach (var sample in deltaSamples)
-                {
-                    delta += sample / Time.deltaTime;
-                }
-                delta /= deltaSamples.Count;
-                velocity = delta;
-            }
-
-            angle += velocity * Time.deltaTime;
-            velocity -= velocity * hingeDrag * Time.deltaTime;
-
-            if (angle < minAngle)
-            {
-                angle = minAngle;
-                if (velocity < 0.0f) velocity = -velocity * minHingeBounce;
-            }
-            else if (angle > maxAngle)
-            {
-                angle = maxAngle;
-                if (velocity > 0.0f) velocity = -velocity * maxHingeBounce;
-            }
-
-            wasBound = ActiveBinding;
+            var force = (grabTarget.Value - Handle.position) * grabSpring - rigidbody.GetPointVelocity(Handle.position) * grabDamper;
+            rigidbody.AddForceAtPosition(force, Handle.position, ForceMode.Acceleration);
+            grabTarget = null;
         }
 
         public override void SetRotation(Quaternion rotation)
         {
+            
         }
     }
 }

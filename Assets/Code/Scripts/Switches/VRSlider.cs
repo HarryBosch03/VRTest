@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Switches
 {
-    public sealed class VRSlider : VRHandle
+    public sealed class VRSlider : VRBindable
     {
         [SerializeField] private float sliderRange;
         [SerializeField] private int stops;
@@ -18,8 +18,8 @@ namespace Switches
 
         private float stopVelocity;
 
-        public override Vector3 HandPosition => grabPoint ? grabPoint.position : handle.position;
-        public override Quaternion HandRotation => grabPoint ? grabPoint.rotation : handle.rotation;
+        public Vector3 HandPosition => grabPoint ? grabPoint.position : handle.position;
+        public Quaternion HandRotation => grabPoint ? grabPoint.rotation : handle.rotation;
 
         protected override void Awake()
         {

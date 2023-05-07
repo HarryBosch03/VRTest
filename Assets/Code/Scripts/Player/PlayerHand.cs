@@ -23,17 +23,17 @@ namespace Player
 
         public InputWrapper gripAction;
         public InputWrapper triggerAction;
-        public InputWrapper attractAction;
 
-        public VRBinding currentBinding;
-        public Transform handModel;
+        public VRBinding activeBinding;
+        [HideInInspector] public Transform handModel;
 
-        public bool ignoreLastBindingCollision;
+        [HideInInspector] public bool ignoreLastBindingCollision;
         
         private Action updateInputs;
 
         private Transform pointRef;
 
+        public Rigidbody Rigidbody { get; private set; }
         public Transform Target { get; private set; }
         public Transform PointRef => pointRef ? pointRef : transform;
         public Collider[] Colliders { get; private set; }
@@ -50,10 +50,10 @@ namespace Player
             Target = transform.parent;
             transform.SetParent(null);
 
+            Rigidbody = gameObject.GetOrAddComponent<Rigidbody>();
             Colliders = GetComponentsInChildren<Collider>();
             
             gripAction = CreateAction("grip");
-            attractAction = CreateAction("primaryButton");
             triggerAction = CreateAction("trigger");
 
             movement.Init(this);
@@ -70,16 +70,16 @@ namespace Player
         private void FixedUpdate()
         {
             movement.MoveTo(Target.position, Target.rotation);
-            binding.UpdateLines();
+            binding.FixedUpdate();
         }
 
         private void Update()
         {
             updateInputs();
 
-            if (currentBinding)
+            if (activeBinding)
             {
-                handModel.gameObject.SetActive(binding.DetachedBinding);
+                handModel.gameObject.SetActive(false);
             }
             else
             {
@@ -90,7 +90,7 @@ namespace Player
 
         private void LateUpdate()
         {
-            binding.UpdateBinding();
+            binding.Update();
         }
 
         public enum Chirality

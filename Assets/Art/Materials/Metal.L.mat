@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Gizmo
+  m_Name: Metal.L
   m_Shader: {fileID: -6465566751694194690, guid: 78024e9c1dc30c7409edba00c43641fc, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -95,31 +95,31 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
-    - _Metallic_Max: 0
-    - _Metallic_Min: 0
+    - _Metallic_Max: 1
+    - _Metallic_Min: 1
     - _Noise_Burn: 0.2
     - _Noise_Influence: 1
     - _OcclusionStrength: 1
-    - _Overall_Noise_Scale: 25
+    - _Overall_Noise_Scale: 1
     - _Parallax: 0.005
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _Roughness_Max: 0.6
+    - _Roughness_Max: 0.4
     - _Roughness_Min: 0.7
-    - _Smoothness: 0.5
+    - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Surface: 0
-    - _Triplanar_Noise: 0
+    - _Triplanar_Noise: 1
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.9056604, g: 0.5073675, b: 0.08116765, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 1}
+    - _Color: {r: 0.509434, g: 0.509434, b: 0.509434, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Layer_Influence: {r: 1, g: 0.5, b: 0.25, a: 0}
+    - _Layer_Influence: {r: 1, g: 0.25, b: 0.125, a: 0}
     - _Noise_Balance: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
     - _Noise_Scale: {r: 1, g: 5, b: 25, a: 0}
     - _Noise_Steps: {r: 2, g: 3, b: 15, a: 0}

@@ -33,4 +33,19 @@ public static class Extensions
     }
 
     public static bool State(this InputAction action) => action.ReadValue<float>() > 0.5f;
+
+    public static void SetLine(this LineRenderer lines, Vector3 a, Vector3 b, bool worldSpace = true)
+    {
+        lines.enabled = true;
+        lines.positionCount = 2;
+        lines.useWorldSpace = worldSpace;
+        
+        lines.SetPosition(0, a);
+        lines.SetPosition(1, b);
+    }
+
+    public static void SetRay(this LineRenderer renderer, Vector3 a, Vector3 b, bool worldSpace = true)
+    {
+        renderer.SetLine(a, a + b, worldSpace);
+    }
 }

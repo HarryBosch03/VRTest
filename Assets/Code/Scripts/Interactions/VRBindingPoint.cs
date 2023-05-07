@@ -12,8 +12,10 @@ namespace Interactions
         [SerializeField] private ListMode listMode = ListMode.Whitelist;
         [SerializeField] private List<VRBindingType> list = new();
         [SerializeField] private ListMode nullTypeBehaviour;
+        [SerializeField] private float maxDisplacment = 0.04f;
 
         private VRBinding activeBinding;
+        private float minDisplacment;
         
         private void OnDrawGizmosSelected()
         {
@@ -29,6 +31,10 @@ namespace Interactions
 
         private void UpdateBinding()
         {
+            var displacement = (activeBinding.Position - transform.position).magnitude;
+            minDisplacment = Mathf.Min(minDisplacment, displacement);
+            if (displacement - minDisplacment > maxDisplacment) activeBinding.Deactivate();
+
             activeBinding.Position = transform.position;
             activeBinding.Rotation = transform.rotation;
         }
