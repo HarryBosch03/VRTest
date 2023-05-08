@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Interactions;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Player.Hands
 {

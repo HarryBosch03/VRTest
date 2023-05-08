@@ -1,25 +1,28 @@
 using UnityEngine;
 
-[SelectionBase]
-[DisallowMultipleComponent]
-public sealed class CircleWalk : MonoBehaviour
+namespace Testing
 {
-    [SerializeField] float radius, speed;
-
-    private Vector3 center;
-    private float d;
-
-    private void Awake()
+    [SelectionBase]
+    [DisallowMultipleComponent]
+    public sealed class CircleWalk : MonoBehaviour
     {
-        center = transform.position;
-    }
+        [SerializeField] float radius, speed;
 
-    private void Update()
-    {
-        var a = d / radius;
-        var newPos = center + new Vector3(Mathf.Cos(a), 0.0f, Mathf.Sin(a)) * radius;
-        transform.forward = transform.position - newPos;
-        transform.position = newPos;
-        d += speed * Time.deltaTime;
+        private Vector3 center;
+        private float d;
+
+        private void Awake()
+        {
+            center = transform.position;
+        }
+
+        private void Update()
+        {
+            var a = d / radius;
+            var newPos = center + new Vector3(Mathf.Cos(a), 0.0f, Mathf.Sin(a)) * radius;
+            transform.forward = transform.position - newPos;
+            transform.position = newPos;
+            d += speed * Time.deltaTime;
+        }
     }
 }

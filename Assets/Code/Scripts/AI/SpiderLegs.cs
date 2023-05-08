@@ -3,150 +3,141 @@ using System.Collections.Generic;
 using Animation;
 using UnityEngine;
 
-[SelectionBase]
-[DisallowMultipleComponent]
-public sealed class SpiderLegs : MonoBehaviour
+namespace AI
 {
-    [SerializeField] private float stepDistance = 0.1f;
-    [SerializeField] private float smoothTime = 0.1f;
-    [SerializeField] private float legLift = 0.01f;
-    [SerializeField] private List<Leg> groupA, groupB;
-
-    private Vector3 pointA, lPointA;
-    private Vector3 pointB, lPointB;
-    private Quaternion rotationA, lRotationA;
-    private Quaternion rotationB, lRotationB;
-    private float changeTimeA, changeTimeB;
-    
-    private void Awake()
+    [SelectionBase]
+    [DisallowMultipleComponent]
+    public sealed class SpiderLegs : MonoBehaviour
     {
-        pointA = transform.position;
-        pointB = transform.position;
+        [SerializeField] private float stepDistance = 0.1f;
+        [SerializeField] private float smoothTime = 0.1f;
+        [SerializeField] private float legLift = 0.01f;
+        [SerializeField] private List<Leg> legs;
 
-        rotationA = transform.rotation;
-        rotationB = transform.rotation;
-    }
-
-    private void Update()
-    {
-        GetNewLegPosition(ref pointA, ref pointB, ref lPointB, ref rotationB, ref lRotationB, ref changeTimeB);
-        GetNewLegPosition(ref pointB, ref pointA, ref lPointA, ref rotationA, ref lRotationA, ref changeTimeA);
-    }
-
-    private void LateUpdate()
-    {
-        void Group(List<Leg> group, Vector3 point, Vector3 lPoint, Quaternion rot, Quaternion lRot, float changeTime)
+        private void LateUpdate()
         {
-            var t = Mathf.Clamp01((Time.time - changeTime) / smoothTime);
-            
-            foreach (var leg in group)
+            UpdateLegTargets();
+
+            foreach (var leg in legs)
             {
-                leg.Animate(Vector3.Lerp(lPoint, point, t) - transform.forward * (Mathf.Sin(t * Mathf.PI) * legLift), Quaternion.Slerp(lRot, rot, t));
+                leg.Animate(legLift, smoothTime);
             }
         }
 
-        Group(groupA, pointA, lPointA, rotationA, lRotationA, changeTimeA);
-        Group(groupB, pointB, lPointB, rotationB, lRotationB, changeTimeB);
-    }
-
-    private void GetNewLegPosition(ref Vector3 close, ref Vector3 far, ref Vector3 lPoint, ref Quaternion rot, ref Quaternion lRot, ref float changeTime)
-    {
-        var closeDist = (close - transform.position).magnitude;
-        var farDist = (far - transform.position).magnitude;
-        if (closeDist > farDist) return;
-
-        var center = (close + far) / 2.0f;
-        var radius = (close - center).magnitude;
-        var centerDist = (center - transform.position).magnitude;
-
-        if (centerDist < radius) return;
-
-        lPoint = far;
-        lRot = rot;
-        changeTime = Time.time;
-        
-        var dir = (transform.position - center).normalized;
-        far = center + dir * stepDistance;
-        rot = transform.rotation;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (!Application.isPlaying) return;
-        
-        void DrawGroup(List<Leg> group, Color color)
+        private void UpdateLegTargets()
         {
-            if (group == null) return;
-            
-            Gizmos.color = color;
-            foreach (var leg in group)
+            foreach (var leg in legs)
+            {
+                leg.target -= transform.forward * Vector3.Dot(transform.forward, leg.target - transform.position);
+            }
+
+            var legCenter = Vector3.zero;
+            foreach (var leg in legs)
+            {
+                legCenter += leg.target;
+            }
+
+            legCenter /= legs.Count;
+
+            Debug.DrawLine(legCenter, transform.position);
+
+            if ((legCenter - transform.position).magnitude < stepDistance / (legs.Count - 1)) return;
+
+            var dir = (transform.position - legCenter).normalized;
+        
+            var lastLeg = legs[0];
+            for (var i = 1; i < legs.Count; i++)
+            {
+                var d1 = Vector3.Dot(lastLeg.target - transform.position, dir);
+                var d2 = Vector3.Dot(legs[i].target - transform.position, dir);
+                if (d2 > d1) continue;
+                lastLeg = legs[i];
+            }
+
+            lastLeg.SetTarget(transform.position + dir * stepDistance);
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (!Application.isPlaying) return;
+
+
+            if (legs == null) return;
+
+            Gizmos.color = Color.green;
+            foreach (var leg in legs)
             {
                 Gizmos.DrawLine(leg.root.position, leg.mid.position);
                 Gizmos.DrawLine(leg.mid.position, leg.tip.position);
+                Gizmos.DrawSphere(leg.target, stepDistance / 4.0f);
             }
         }
 
-        DrawGroup(groupA, Color.red);
-        DrawGroup(groupB, Color.green);
-
-        Gizmos.color = new Color(1.0f, 1.0f, 0.0f, 1.0f);
-        Gizmos.DrawSphere(pointA, stepDistance / 4.0f);
-        Gizmos.color = new Color(0.0f, 1.0f, 1.0f, 1.0f);
-        Gizmos.DrawSphere(pointB, stepDistance / 4.0f);
-    }
-
-    [ContextMenu("Bake Legs")]
-    private void BakeLegs()
-    {
-        groupA = new List<Leg>();
-        groupB = new List<Leg>();
-        
-        foreach (Transform child in transform)
+        [ContextMenu("Bake Legs")]
+        private void BakeLegs()
         {
-            // L e g . 1 . 1 . R
-            // 0 1 2 3 4 5 6 7 8
-
-            if (child.name[..3] != "Leg") continue;
-
-            var side = child.name[8] == 'L' ? 0 : 1;
-            var index = int.Parse(child.name[4].ToString());
-
-            var list = index % 2 == side ? groupA : groupB;
-            list.Add(new Leg(transform, child));
+            legs.Clear();
+            foreach (Transform child in transform)
+            {
+                if (child.name[..3] != "Leg") continue;
+                var leg = new Leg(transform, child);
+                legs.Add(leg);
+            }
         }
-    }
 
-    [System.Serializable]
-    public class Leg
-    {
-        public Transform center;
-        
-        public Transform root;
-        public Transform mid;
-        public Transform tip;
-
-        public IK ik;
-        
-        public Vector3 offset;
-        public Vector3 start;
-
-        public Leg(Transform center, Transform root)
+        [Serializable]
+        public class Leg
         {
-            this.center = center;
-            this.root = root;
+            public Transform center;
+
+            public Transform root;
+            public Transform mid;
+            public Transform tip;
+
+            public IK ik;
+
+            public Vector3 start;
+            public Vector3 localOffset;
+        
+            private float lastTargetChangeTime;
+            private Vector3 lastTarget;
+            [NonSerialized]public Vector3 target;
+            private Vector3 lastOffset;
+            private Vector3 offset;
+
+            public Leg(Transform center, Transform root)
+            {
+                this.center = center;
+                this.root = root;
+
+                mid = root.GetChild(0);
+                tip = mid.GetChild(0);
+
+                ik = new IK(root, mid, tip);
+
+                start = center.InverseTransformPoint(root.position);
+                localOffset = center.InverseTransformVector(tip.position - center.position);
+            }
+
+            public void Animate(float legLift, float smoothTime)
+            {
+                var t = Mathf.Clamp01((Time.time - lastTargetChangeTime) / smoothTime);
+                var p = Vector3.Lerp(lastTarget, target, t) + Vector3.up * (Mathf.Sin(t * Mathf.PI) * legLift);
+                var offset = Vector3.Lerp(lastOffset, this.offset, t);
             
-            mid = root.GetChild(0);
-            tip = mid.GetChild(0);
+                ik.Solve(center.TransformPoint(start), p + offset, -center.forward);
+            }
 
-            ik = new IK(root, mid, tip);
+            public void SetTarget(Vector3 target)
+            {
+                lastTarget = this.target;
+                this.target = target;
 
-            start = Quaternion.Inverse(center.rotation) * (root.position - center.position);
-            offset = Quaternion.Inverse(center.rotation) * (tip.position - center.position);
-        }
-
-        public void Animate(Vector3 point, Quaternion rotation)
-        {
-            ik.Solve(center.position + rotation * start, point + rotation * offset, -center.forward);
+                lastOffset = offset;
+                offset = center.TransformVector(localOffset);
+            
+                lastTargetChangeTime = Time.time;
+            }
         }
     }
 }

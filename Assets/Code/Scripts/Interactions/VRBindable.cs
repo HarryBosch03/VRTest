@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using Input;
+using Interactions.Pickups;
+using Player;
 using UnityEngine;
 
 namespace Interactions
@@ -62,6 +65,15 @@ namespace Interactions
             }
 
             return res;
+        }
+
+        public void Trigger(PlayerHand hand, InputWrapper action)
+        {
+            var listeners = GetComponentsInChildren<IVRBindableListener>();
+            foreach (var listener in listeners)
+            {
+                listener.Trigger(hand, this, action);
+            }
         }
     }
 }

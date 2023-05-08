@@ -80,6 +80,7 @@ namespace Player
             if (activeBinding)
             {
                 handModel.gameObject.SetActive(false);
+                activeBinding.bindable.Trigger(this, triggerAction);
             }
             else
             {

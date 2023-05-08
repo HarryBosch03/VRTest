@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +19,9 @@ namespace Interactions
         private Vector3 tPosition;
         private Quaternion tRotation;
 
+        public event Action BindingActiveEvent;
+        public event Action BindingDeactiveEvent;
+        
         private static PhysicMaterial overridePhysicMaterial;
 
         private static PhysicMaterial OverridePhysicMaterial
@@ -59,6 +63,8 @@ namespace Interactions
                 data.lastMaterial = data.collider.sharedMaterial;
                 data.collider.sharedMaterial = OverridePhysicMaterial;
             }
+            
+            BindingActiveEvent?.Invoke();
         }
 
         public override void OnBindingDeactivated()
@@ -69,6 +75,8 @@ namespace Interactions
             {
                 data.collider.sharedMaterial = data.lastMaterial;
             }
+            
+            BindingDeactiveEvent?.Invoke();
         }
 
         protected override void Awake()
