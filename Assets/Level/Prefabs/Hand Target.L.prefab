@@ -1328,18 +1328,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 8468296114562725170}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cc165d90a5291f48ad9abfeda99e3bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 125fe38579f85af4e9ad3a640a8b3e7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultHandModelChirality: 1
+  defaultHandModelChirality: 0
   flipAxis: {x: 1, y: 0, z: 0}
   binding:
     pickupRange: 0.2
     throwForceScale: 1
-    detachedBindingSpring: 25
-    detachedBindingDamping: 3
+    detachedBindingSpring: 5
+    detachedBindingDamping: 5
     detachedBindingAngularDrag: 5
-    maxPointAngle: 22.5
+    maxPointAngle: 15
   handModel: {fileID: 0}
   ignoreLastBindingCollision: 0
 --- !u!1 &8468296115083233522

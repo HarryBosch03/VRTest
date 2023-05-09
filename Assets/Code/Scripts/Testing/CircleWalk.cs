@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace VRTest.Testing
+namespace Testing
 {
     [SelectionBase]
     [DisallowMultipleComponent]

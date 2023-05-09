@@ -2,7 +2,7 @@ using System.Globalization;
 using TMPro;
 using UnityEngine;
 
-namespace VRTest.UI
+namespace UI
 {
     [SelectionBase]
     [DisallowMultipleComponent]

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Animation;
 using UnityEngine;
-using VRTest.Animation;
 
-namespace VRTest.AI
+namespace AI
 {
     [SelectionBase]
     [DisallowMultipleComponent]

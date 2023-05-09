@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
-using UnityEditor.Rendering;
-using UnityEditor.SceneTemplate;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Editor.Automation
 {

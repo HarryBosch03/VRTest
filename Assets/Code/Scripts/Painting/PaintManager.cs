@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace VRTest.Painting
+namespace Painting
 {
     public static class PaintManager
     {

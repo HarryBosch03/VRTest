@@ -168,6 +168,12 @@
       },
       "url": "https://packages.unity.com"
     },
+    "net.harrybosch.handyvr": {
+      "version": "file:net.harrybosch.handyvr",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
