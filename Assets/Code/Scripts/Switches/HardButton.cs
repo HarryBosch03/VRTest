@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Switches
+namespace VRTest.Switches
 {
     [SelectionBase]
     [DisallowMultipleComponent]

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Animation
+namespace VRTest.Animation
 {
     [System.Serializable]
     public class IK

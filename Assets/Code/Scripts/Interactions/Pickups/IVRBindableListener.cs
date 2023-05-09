@@ -1,7 +1,7 @@
-﻿using Input;
-using Player;
+﻿using VRTest.Input;
+using VRTest.Player;
 
-namespace Interactions.Pickups
+namespace VRTest.Interactions.Pickups
 {
     public interface IVRBindableListener
     {

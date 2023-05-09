@@ -1,7 +1,7 @@
 using System;
 using UnityEngine.InputSystem;
 
-namespace Input
+namespace VRTest.Input
 {
     public class InputWrapper
     {

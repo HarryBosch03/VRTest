@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using Interactions;
 using UnityEngine;
+using VRTest.Interactions;
 
-namespace Player.Hands
+namespace VRTest.Player.Hands
 {
     [System.Serializable]
     public class HandBinding
@@ -21,6 +21,7 @@ namespace Player.Hands
         private VRBindable pointGrab;
 
         private static HashSet<VRBindable> existingPointBindings = new();
+        public VRBinding ActiveBinding { get; private set; }
 
         public void Init(PlayerHand hand)
         {
@@ -34,7 +35,7 @@ namespace Player.Hands
         {
             hand.gripAction.WasPressedThisFrame(OnGrip);
 
-            if (hand.activeBinding)
+            if (hand.ActiveBinding)
             {
                 UpdateActiveBinding();
                 return;
@@ -86,8 +87,8 @@ namespace Player.Hands
 
         private void UpdateActiveBinding()
         {
-            hand.activeBinding.Position = hand.Target.position;
-            hand.activeBinding.Rotation = hand.Target.rotation;
+            hand.ActiveBinding.Position = hand.Target.position;
+            hand.ActiveBinding.Rotation = hand.Target.rotation;
         }
 
         private void Bind(VRBindable pickup)
@@ -98,7 +99,7 @@ namespace Player.Hands
                 hand.ignoreLastBindingCollision = true;
             }
 
-            hand.activeBinding = pickup.CreateBinding(throwForceScale);
+            ActiveBinding = pickup.CreateBinding(throwForceScale);
         }
 
         private VRBindable GetPointingAt()
@@ -136,7 +137,7 @@ namespace Player.Hands
 
         private void OnGrip(bool state)
         {
-            hand.activeBinding?.Deactivate();
+            hand.ActiveBinding?.Deactivate();
             existingPointBindings.Remove(pointGrab);
             pointGrab = null;
 

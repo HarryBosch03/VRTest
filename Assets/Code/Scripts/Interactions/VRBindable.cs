@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Input;
-using Interactions.Pickups;
-using Player;
 using UnityEngine;
+using VRTest.Input;
+using VRTest.Interactions.Pickups;
+using VRTest.Player;
 
-namespace Interactions
+namespace VRTest.Interactions
 {
     public abstract class VRBindable : MonoBehaviour
     {

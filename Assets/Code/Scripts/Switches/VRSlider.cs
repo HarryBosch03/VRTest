@@ -1,7 +1,7 @@
-using Interactions;
 using UnityEngine;
+using VRTest.Interactions;
 
-namespace Switches
+namespace VRTest.Switches
 {
     public sealed class VRSlider : VRBindable
     {

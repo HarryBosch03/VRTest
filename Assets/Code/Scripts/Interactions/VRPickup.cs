@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Interactions
+namespace VRTest.Interactions
 {
     [SelectionBase]
     [DisallowMultipleComponent]

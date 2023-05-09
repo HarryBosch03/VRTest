@@ -1,7 +1,10 @@
 using UnityEngine;
 
-namespace Player.Hands
+namespace VRTest.Player.Hands
 {
+    /// <summary>
+    /// Subclass for PlayerHand that manages the movement and collision.
+    /// </summary>
     [System.Serializable]
     public class HandMovement
     {
@@ -25,8 +28,10 @@ namespace Player.Hands
 
         public void MoveTo(Vector3 newPosition, Quaternion newRotation)
         {
+            // If the hand has a binding, just teleport hand to tracked position, the
+            // bound object will have their own collision.
             var rb = hand.Rigidbody;
-            if (hand.activeBinding)
+            if (hand.ActiveBinding)
             {
                 rb.isKinematic = true;
                 hand.transform.position = newPosition;
@@ -39,28 +44,40 @@ namespace Player.Hands
             rb.isKinematic = false;
             rb.centerOfMass = Vector3.zero;
 
+            // Add a force that effectively cancels out the current velocity, and translates the hand to the target position.
+            // Using a force instead is purely for collision and stability, MovePosition ended up causing horrific desync.
             var force = (newPosition - rb.position) / Time.deltaTime - rb.velocity;
             rb.AddForce(force, ForceMode.VelocityChange);
 
+            // Do the same with a torque, match the current target rotation.
             var delta = newRotation * Quaternion.Inverse(rb.rotation);
             delta.ToAngleAxis(out var angle, out var axis);
             var torque = axis * (angle * Mathf.Deg2Rad / Time.deltaTime)- rb.angularVelocity;
             rb.AddTorque(torque , ForceMode.VelocityChange);
         }
 
+        /// <summary>
+        /// Checks if the last thing we held was colliding with this hand, but isn't this frame,
+        /// if so, stop ignoring its collision.
+        /// </summary>
         private void CheckIgnoreLastBindingCollision()
         {
+            // Skip if the hand is inactive, band aid fix for order of operations.
+            // if the hand is still inactive from holding the object, it will pass as,
+            // "not colling" and re-enable collision, causing the held object to loose,
+            // its thrown velocity by colliding with the hand on its way out.
             if (!hand.handModel.gameObject.activeInHierarchy) return;
             
+            // Check we have a last bound object, and we are actually ignoring its collision.
             if (!hand.ignoreLastBindingCollision) return;
-            if (hand.activeBinding == null) return;
-            if (!hand.activeBinding.bindable) return;
+            if (hand.ActiveBinding == null) return;
+            if (!hand.ActiveBinding.bindable) return;
 
-            if (!hand.handModel.gameObject.activeInHierarchy) return;
-            
+            // Loop through all colliders in the held object and the hand. If one of them are
+            // intersecting, they are intersecting and we continue to ignore the collision.
             var collided = false;
             var listA = hand.Colliders;
-            var listB = hand.activeBinding.bindable.GetComponentsInChildren<Collider>();
+            var listB = hand.ActiveBinding.bindable.GetComponentsInChildren<Collider>();
             foreach (var a in listA)
             {
                 foreach (var b in listB)
@@ -77,9 +94,9 @@ namespace Player.Hands
             
             
             if (collided) return;
-
+            
             hand.ignoreLastBindingCollision = false;
-            Utility.IgnoreCollision(hand.activeBinding.bindable.gameObject, hand.gameObject, false);
+            Utility.IgnoreCollision(hand.ActiveBinding.bindable.gameObject, hand.gameObject, false);
         }
     }
 }

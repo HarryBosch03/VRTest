@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Player.Hands
+namespace VRTest.Player.Hands
 {
     [System.Serializable]
     public class HandAnimator

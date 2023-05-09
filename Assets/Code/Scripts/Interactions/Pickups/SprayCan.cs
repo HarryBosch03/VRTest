@@ -1,8 +1,8 @@
-﻿using Input;
-using Player;
-using UnityEngine;
+﻿using UnityEngine;
+using VRTest.Input;
+using VRTest.Player;
 
-namespace Interactions.Pickups
+namespace VRTest.Interactions.Pickups
 {
     [RequireComponent(typeof(VRPickup))]
     public class SprayCan : MonoBehaviour, IVRBindableListener

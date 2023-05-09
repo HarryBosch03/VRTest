@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Painting
+namespace VRTest.Painting
 {
     [SelectionBase]
     [DisallowMultipleComponent]
@@ -14,6 +14,12 @@ namespace Painting
         {
             brush.position = transform.position;
             foreach (var renderer in renderers) PaintManager.Paint(brush, renderer);
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = brush.color;
+            Gizmos.DrawWireSphere(transform.position, brush.radius);
         }
     }
 }
