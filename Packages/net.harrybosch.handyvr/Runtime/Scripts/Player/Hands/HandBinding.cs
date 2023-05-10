@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using HandyVR.Interactions;
 using UnityEngine;
-using VRTest.Runtime.Scripts.Interactions;
 
-namespace VRTest.Runtime.Scripts.Player.Hands
+namespace HandyVR.Player.Hands
 {
     [System.Serializable]
     public class HandBinding
@@ -33,7 +33,7 @@ namespace VRTest.Runtime.Scripts.Player.Hands
 
         public void Update()
         {
-            hand.gripAction.WasPressedThisFrame(OnGrip);
+            hand.Input.Grip.ChangedThisFrame(OnGrip);
 
             if (hand.ActiveBinding)
             {
@@ -66,11 +66,9 @@ namespace VRTest.Runtime.Scripts.Player.Hands
             if (!pointGrab) return;
 
             if ((hand.transform.position - pointGrab.Rigidbody.position).magnitude <
-                (pointGrab.Rigidbody.velocity.magnitude * Time.deltaTime + pickupRange) * 1.01f)
+                (pointGrab.Rigidbody.velocity.magnitude * Time.deltaTime) * 1.01f)
             {
-                Bind(pointGrab);
-                existingPointBindings.Remove(pointGrab);
-                pointGrab = null;
+                DetachPointGrab(true);
                 return;
             }
 
@@ -85,10 +83,21 @@ namespace VRTest.Runtime.Scripts.Player.Hands
                 ForceMode.Acceleration);
         }
 
+        private void DetachPointGrab(bool bind)
+        {
+            if (!pointGrab) return;
+            Utility.IgnoreCollision(pointGrab.gameObject, hand.gameObject, false);
+            
+            if (bind) Bind(pointGrab);
+
+            existingPointBindings.Remove(pointGrab);
+            pointGrab = null;
+        }
+
         private void UpdateActiveBinding()
         {
             hand.ActiveBinding.Position = hand.Target.position;
-            hand.ActiveBinding.Rotation = hand.Target.rotation;
+            hand.ActiveBinding.Rotation = hand.Flipped ? hand.Target.rotation : hand.Target.rotation * Quaternion.Euler(0.0f, 180.0f, 0.0f);
         }
 
         private void Bind(VRBindable pickup)
@@ -138,8 +147,7 @@ namespace VRTest.Runtime.Scripts.Player.Hands
         private void OnGrip(bool state)
         {
             hand.ActiveBinding?.Deactivate();
-            existingPointBindings.Remove(pointGrab);
-            pointGrab = null;
+            DetachPointGrab(false);
 
             if (state) OnGripPressed();
         }
@@ -164,6 +172,7 @@ namespace VRTest.Runtime.Scripts.Player.Hands
 
             pointGrab = pointingAt;
             existingPointBindings.Add(pointGrab);
+            Utility.IgnoreCollision(pointGrab.gameObject, hand.gameObject, true);
         }
     }
 }

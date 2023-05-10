@@ -293,7 +293,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 8468296114562725171}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8334570694368333380
 MeshFilter:
@@ -952,7 +952,7 @@ Transform:
   - {fileID: 1615383579164873204}
   - {fileID: 6821701154088016399}
   m_Father: {fileID: 8468296114562725171}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -15, y: 0, z: 180}
 --- !u!95 &4808382823350644736
 Animator:
@@ -1105,7 +1105,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8468296114562725171}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!120 &5029589130065269683
 LineRenderer:
@@ -1312,10 +1312,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8468296115392732625}
   - {fileID: 7699514464285278570}
   - {fileID: 2360459348999794806}
   - {fileID: 6292971788821796202}
+  - {fileID: 8468296115392732625}
   m_Father: {fileID: 8468296115083233523}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1331,13 +1331,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 125fe38579f85af4e9ad3a640a8b3e7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultHandModelChirality: 0
+  chirality: 0
+  defaultHandModelChirality: 1
   flipAxis: {x: 1, y: 0, z: 0}
+  movement:
+    rumbleMagnitude: 0.2
   binding:
     pickupRange: 0.2
     throwForceScale: 1
-    detachedBindingSpring: 5
-    detachedBindingDamping: 5
+    detachedBindingSpring: 50
+    detachedBindingDamping: 10
     detachedBindingAngularDrag: 5
     maxPointAngle: 15
   handModel: {fileID: 0}
@@ -1351,7 +1354,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8468296115083233523}
-  - component: {fileID: 8468296115083233534}
   m_Layer: 0
   m_Name: Hand Target.L
   m_TagString: Untagged
@@ -1376,24 +1378,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8468296115083233534
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8468296115083233522}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Device: 1
-  m_PoseSource: 4
-  m_PoseProviderComponent: {fileID: 0}
-  m_TrackingType: 0
-  m_UpdateType: 0
-  m_UseRelativeTransform: 0
 --- !u!1 &8468296115392732624
 GameObject:
   m_ObjectHideFlags: 0
@@ -1417,14 +1401,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8468296115392732624}
-  m_LocalRotation: {x: -0, y: -0.6087616, z: 0.7933532, w: 0}
-  m_LocalPosition: {x: 0, y: -5.5661545, z: 1.5545282}
-  m_LocalScale: {x: 50, y: 50, z: 50}
+  m_LocalRotation: {x: 0.60876137, y: 0, z: 0, w: 0.7933534}
+  m_LocalPosition: {x: 0, y: -0.11132309, z: 0.031090565}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8468296114562725171}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -89.98, y: 0, z: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 75, y: 0, z: 0}
 --- !u!1 &8723789574101594710
 GameObject:
   m_ObjectHideFlags: 0

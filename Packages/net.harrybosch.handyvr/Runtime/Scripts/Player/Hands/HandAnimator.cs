@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace VRTest.Runtime.Scripts.Player.Hands
+namespace HandyVR.Player.Hands
 {
     [System.Serializable]
     public class HandAnimator
@@ -20,8 +20,8 @@ namespace VRTest.Runtime.Scripts.Player.Hands
 
         public void Update()
         {
-            animator.SetFloat(Grip, hand.gripAction.action.ReadValue<float>());
-            animator.SetFloat(Trigger, hand.triggerAction.action.ReadValue<float>());
+            animator.SetFloat(Grip, hand.Input.Grip.Value);
+            animator.SetFloat(Trigger, hand.Input.Trigger.Value);
         }
     }
 }

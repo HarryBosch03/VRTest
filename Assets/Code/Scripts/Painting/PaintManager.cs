@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
 namespace Painting
@@ -19,9 +20,15 @@ namespace Painting
         private static readonly int BHardness = Shader.PropertyToID("_BHardness");
         private static readonly int PaintTex = Shader.PropertyToID("_PaintTex");
 
+        private static readonly int Behind = Shader.PropertyToID("_Behind");
+
         public static RenderTexture GetTexture(Renderer renderer)
         {
-            if (!TextureMap.ContainsKey(renderer)) TextureMap.Add(renderer, new RenderTexture(TextureSize, TextureSize, 0));
+            if (!TextureMap.ContainsKey(renderer))
+            {
+                var rt = new RenderTexture(TextureSize, TextureSize, GraphicsFormat.R8G8B8A8_SRGB, GraphicsFormat.None);
+                TextureMap.Add(renderer, rt);
+            }
             return TextureMap[renderer];
         }
         
@@ -39,6 +46,9 @@ namespace Painting
                 material.SetTexture(PaintTex, texture);
             }
             
+            Cmd.GetTemporaryRT(Behind, TextureSize, TextureSize, 0);
+            Cmd.SetRenderTarget(Behind);
+            Cmd.Blit(texture, Behind);
             Cmd.SetRenderTarget(texture);
             Cmd.DrawRenderer(renderer, paintMaterial);
             

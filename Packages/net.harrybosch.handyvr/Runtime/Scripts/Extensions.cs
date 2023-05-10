@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace VRTest.Runtime.Scripts
+namespace HandyVR
 {
     public static class Extensions
     {

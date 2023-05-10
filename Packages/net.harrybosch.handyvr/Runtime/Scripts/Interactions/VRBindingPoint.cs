@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace VRTest.Runtime.Scripts.Interactions
+namespace HandyVR.Interactions
 {
     [SelectionBase]
     [DisallowMultipleComponent]

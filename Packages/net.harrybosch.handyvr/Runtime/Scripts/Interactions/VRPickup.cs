@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace VRTest.Runtime.Scripts.Interactions
+namespace HandyVR.Interactions
 {
     [SelectionBase]
     [DisallowMultipleComponent]
@@ -13,8 +13,6 @@ namespace VRTest.Runtime.Scripts.Interactions
         [SerializeField] private Quaternion rOffset = Quaternion.identity;
 
         private readonly List<ColliderData> colliderData = new();
-        
-        private bool wasUsingGravity;
         
         private Vector3 tPosition;
         private Quaternion tRotation;
@@ -55,9 +53,6 @@ namespace VRTest.Runtime.Scripts.Interactions
 
         public override void OnBindingActivated()
         {
-            wasUsingGravity = Rigidbody.useGravity;
-            Rigidbody.useGravity = false;
-
             foreach (var data in colliderData)
             {
                 data.lastMaterial = data.collider.sharedMaterial;
@@ -69,8 +64,6 @@ namespace VRTest.Runtime.Scripts.Interactions
 
         public override void OnBindingDeactivated()
         {
-            Rigidbody.useGravity = wasUsingGravity;
-
             foreach (var data in colliderData)
             {
                 data.collider.sharedMaterial = data.lastMaterial;
@@ -81,6 +74,8 @@ namespace VRTest.Runtime.Scripts.Interactions
 
         protected override void Awake()
         {
+            gameObject.GetOrAddComponent<Rigidbody>();
+            
             base.Awake();
 
             Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace VRTest.Runtime.Scripts
+namespace HandyVR
 {
     public static class Utility
     {

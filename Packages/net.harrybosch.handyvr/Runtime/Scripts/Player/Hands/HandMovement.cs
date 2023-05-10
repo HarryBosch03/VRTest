@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace VRTest.Runtime.Scripts.Player.Hands
+namespace HandyVR.Player.Hands
 {
     /// <summary>
     /// Subclass for PlayerHand that manages the movement and collision.
@@ -8,6 +8,8 @@ namespace VRTest.Runtime.Scripts.Player.Hands
     [System.Serializable]
     public class HandMovement
     {
+        [SerializeField] [Range(0.0f, 1.0f)] private float rumbleMagnitude;
+        
         private PlayerHand hand;
         
         public void Init(PlayerHand hand)
@@ -54,6 +56,11 @@ namespace VRTest.Runtime.Scripts.Player.Hands
             delta.ToAngleAxis(out var angle, out var axis);
             var torque = axis * (angle * Mathf.Deg2Rad / Time.deltaTime)- rb.angularVelocity;
             rb.AddTorque(torque , ForceMode.VelocityChange);
+        }
+
+        public void OnCollision(Collision collision)
+        {
+            hand.Input.Rumble(rumbleMagnitude, 0.0f);
         }
 
         /// <summary>

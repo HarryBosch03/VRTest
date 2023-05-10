@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace VRTest.Runtime.Scripts.Switches
+namespace HandyVR.Switches
 {
     [SelectionBase]
     [DisallowMultipleComponent]

@@ -1,10 +1,10 @@
-﻿using VRTest.Runtime.Scripts.Input;
-using VRTest.Runtime.Scripts.Player;
+﻿using HandyVR.Player;
+using HandyVR.Player.Input;
 
-namespace VRTest.Runtime.Scripts.Interactions.Pickups
+namespace HandyVR.Interactions.Pickups
 {
     public interface IVRBindableListener
     {
-        void Trigger(PlayerHand hand, VRBindable bindable, InputWrapper input);
+        void Trigger(PlayerHand hand, VRBindable bindable, HandInput.InputWrapper input);
     }
 }

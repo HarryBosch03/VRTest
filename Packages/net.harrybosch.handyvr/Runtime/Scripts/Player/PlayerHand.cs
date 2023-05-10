@@ -1,11 +1,11 @@
 using System;
+using HandyVR.Interactions;
+using HandyVR.Player.Hands;
+using HandyVR.Player.Input;
 using UnityEngine;
-using UnityEngine.SpatialTracking;
-using VRTest.Runtime.Scripts.Input;
-using VRTest.Runtime.Scripts.Interactions;
-using VRTest.Runtime.Scripts.Player.Hands;
+using UnityEngine.InputSystem.XR;
 
-namespace VRTest.Runtime.Scripts.Player
+namespace HandyVR.Player
 {
     /// <summary>
     /// Behaviour that controls the hands, should be placed on a child
@@ -15,59 +15,45 @@ namespace VRTest.Runtime.Scripts.Player
     [DisallowMultipleComponent]
     public sealed class PlayerHand : MonoBehaviour
     {
-        [Space] 
+        [Space] [SerializeField] private Chirality chirality;
         [SerializeField] private Chirality defaultHandModelChirality;
         [SerializeField] private Vector3 flipAxis = Vector3.right;
 
-        [Space] 
-        [SerializeField] private HandMovement movement;
+        [Space] [SerializeField] private HandMovement movement;
         [SerializeField] private HandBinding binding;
         [SerializeField] private HandAnimator animator;
-
-        public InputWrapper gripAction;
-        public InputWrapper triggerAction;
 
         [HideInInspector] public Transform handModel;
 
         [HideInInspector] public bool ignoreLastBindingCollision;
-        
-        private Action updateInputsCallback;
-        private Chirality chirality;
 
         private Transform pointRef;
 
+        public HandInput Input { get; private set; }
         public VRBinding ActiveBinding => binding.ActiveBinding;
         public Rigidbody Rigidbody { get; private set; }
         public Transform Target { get; private set; }
         public Transform PointRef => pointRef ? pointRef : transform;
         public Collider[] Colliders { get; private set; }
-        
-        /// <summary>
-        /// Creates an Input Wrapper object for a XRController binding, with the correct controller chirality.
-        /// </summary>
-        /// <param name="binding">The Unity Input System name of the binding, must be a binding from a XRController device</param>
-        /// <returns></returns>
-        public InputWrapper CreateAction(string binding)
-        {
-            binding = "<XRController>{" + (chirality == Chirality.Left ? "LeftHand" : "RightHand") + "}/" + binding;
-            var action = new InputWrapper(binding: binding, ref updateInputsCallback);
-            return action;
-        }
+        public bool Flipped => chirality != defaultHandModelChirality;
 
         private void Awake()
         {
             // Clear Parent to stop the transform hierarchy from fucking up physics.
             // TODO - actually test if this actually does anything.
             Target = transform.parent;
-            transform.SetParent(null);
 
-            SetChirality();
+            Func<XRController> controller = chirality switch
+            {
+                Chirality.Left => () => XRController.leftHand,
+                Chirality.Right => () => XRController.rightHand,
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            Input = new HandInput(controller);
 
             Rigidbody = gameObject.GetOrAddComponent<Rigidbody>();
             Colliders = GetComponentsInChildren<Collider>();
-            
-            gripAction = CreateAction("grip");
-            triggerAction = CreateAction("trigger");
 
             movement.Init(this);
             binding.Init(this);
@@ -76,33 +62,10 @@ namespace VRTest.Runtime.Scripts.Player
             pointRef = transform.DeepFind("Point Ref");
 
             handModel = transform.DeepFind("Model");
-            if (chirality != defaultHandModelChirality)
-                handModel.localScale = Vector3.Reflect(Vector3.one, flipAxis.normalized);
-        }
-
-        private void SetChirality()
-        {
-            var trackedPoseDriver = Target.GetComponent<TrackedPoseDriver>();
-            switch (trackedPoseDriver.poseSource)
+            if (Flipped)
             {
-                case TrackedPoseDriver.TrackedPose.LeftPose:
-                    chirality = Chirality.Left;
-                    break;
-                case TrackedPoseDriver.TrackedPose.RightPose:
-                    chirality = Chirality.Right;
-                    break;
-
-                case TrackedPoseDriver.TrackedPose.LeftEye:
-                case TrackedPoseDriver.TrackedPose.RightEye:
-                case TrackedPoseDriver.TrackedPose.Center:
-                case TrackedPoseDriver.TrackedPose.Head:
-                case TrackedPoseDriver.TrackedPose.ColorCamera:
-                case TrackedPoseDriver.TrackedPose.DepthCameraDeprecated:
-                case TrackedPoseDriver.TrackedPose.FisheyeCameraDeprected:
-                case TrackedPoseDriver.TrackedPose.DeviceDeprecated:
-                case TrackedPoseDriver.TrackedPose.RemotePose:
-                default:
-                    throw new ArgumentOutOfRangeException();
+                var scale = Vector3.Reflect(Vector3.one, flipAxis.normalized);
+                handModel.localScale = scale;
             }
         }
 
@@ -114,12 +77,14 @@ namespace VRTest.Runtime.Scripts.Player
 
         private void Update()
         {
-            updateInputsCallback();
+            Input.Update();
+            Target.position = Input.Position;
+            Target.rotation = Input.Rotation;
 
             if (ActiveBinding)
             {
                 handModel.gameObject.SetActive(false);
-                ActiveBinding.bindable.Trigger(this, triggerAction);
+                ActiveBinding.bindable.Trigger(this, Input.Trigger);
             }
             else
             {
@@ -131,6 +96,11 @@ namespace VRTest.Runtime.Scripts.Player
         private void LateUpdate()
         {
             binding.Update();
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            movement.OnCollision(collision);
         }
 
         public enum Chirality

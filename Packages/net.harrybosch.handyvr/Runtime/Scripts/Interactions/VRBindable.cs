@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
+using HandyVR.Interactions.Pickups;
+using HandyVR.Player;
+using HandyVR.Player.Input;
 using UnityEngine;
-using VRTest.Runtime.Scripts.Input;
-using VRTest.Runtime.Scripts.Interactions.Pickups;
-using VRTest.Runtime.Scripts.Player;
 
-namespace VRTest.Runtime.Scripts.Interactions
+namespace HandyVR.Interactions
 {
     public abstract class VRBindable : MonoBehaviour
     {
@@ -67,7 +67,7 @@ namespace VRTest.Runtime.Scripts.Interactions
             return res;
         }
 
-        public void Trigger(PlayerHand hand, InputWrapper action)
+        public void Trigger(PlayerHand hand, HandInput.InputWrapper action)
         {
             var listeners = GetComponentsInChildren<IVRBindableListener>();
             foreach (var listener in listeners)

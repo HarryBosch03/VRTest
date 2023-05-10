@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace VRTest.Editor
+namespace HandyVR.Editor
 {
     public sealed class FixBlenderModel : AssetPostprocessor
     {

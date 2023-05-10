@@ -13,7 +13,6 @@
 		ZTest Always
 		ZWrite Off
 		Cull Off
-		Blend One One
 		
 		Pass
 		{
@@ -51,13 +50,19 @@
 			float4 _BColor;
 			float _BSize;
 			float _BHardness;
+
+			TEXTURE2D(_Behind);
+			SAMPLER(sampler_Behind);
 			
 			float4 frag (Varyings i) : SV_Target
 			{
 				float distance = length(i.worldPos - _BPos);
 				float falloff = clamp((_BSize - distance) / (_BSize * (1 - _BHardness)), 0.0, 1.0);
-				float3 col = _BColor * falloff;
-				return float4(col, 1.0);
+
+				float4 behind = SAMPLE_TEXTURE2D(_Behind, sampler_Behind, i.uv);
+				float4 color = lerp(behind, _BColor, _BColor.a * falloff);
+				
+				return color;
 			}
 			ENDHLSL
 		}

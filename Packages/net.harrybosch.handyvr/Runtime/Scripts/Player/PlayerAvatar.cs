@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace VRTest.Runtime.Scripts.Player
+namespace HandyVR.Player
 {
     [SelectionBase]
     [DisallowMultipleComponent]

@@ -1,11 +1,9 @@
+using HandyVR.Player;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.SpatialTracking;
-using VRTest.Runtime.Scripts;
-using VRTest.Runtime.Scripts.Player;
 using UEditor = UnityEditor.Editor;
 
-namespace VRTest.Editor.Player
+namespace HandyVR.Editor.Player
 {
     [CustomEditor(typeof(PlayerHand))]
     public class PlayerHandEditor : UEditor
@@ -21,7 +19,7 @@ namespace VRTest.Editor.Player
             hand = target as PlayerHand;
             if (!hand) return;
 
-            var hasIssues = !IsChildOfTrackedPoseDriver();
+            var hasIssues = false;
             hasIssues = !HasPointReference() || hasIssues;
             hasIssues = !HasModel() || hasIssues;
 
@@ -29,18 +27,6 @@ namespace VRTest.Editor.Player
             {
                 EditorGUILayout.HelpBox("No Problems here :D", MessageType.Info);
             }
-        }
-
-        private bool IsChildOfTrackedPoseDriver()
-        {
-            if (hand.transform.parent && hand.transform.parent.GetComponent<TrackedPoseDriver>()) return true;
-            if (hand.transform.parent && hand.transform.parent.GetComponent<UnityEngine.InputSystem.XR.TrackedPoseDriver>())
-            {
-                EditorGUILayout.HelpBox("PlayerHand does not support Tracked Pose Driver (Input System)", MessageType.Error);
-                return true;
-            }
-            EditorGUILayout.HelpBox("PlayerHand must be a child of a Tracked Pose Driver", MessageType.Error);
-            return false;
         }
 
         private bool HasPointReference()

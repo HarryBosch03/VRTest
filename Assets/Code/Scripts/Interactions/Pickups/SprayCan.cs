@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using VRTest.Runtime.Scripts;
-using VRTest.Runtime.Scripts.Input;
-using VRTest.Runtime.Scripts.Interactions;
-using VRTest.Runtime.Scripts.Interactions.Pickups;
-using VRTest.Runtime.Scripts.Player;
+﻿using HandyVR.Interactions;
+using HandyVR.Interactions.Pickups;
+using HandyVR.Player;
+using HandyVR.Player.Input;
+using UnityEngine;
 
 namespace Interactions.Pickups
 {
@@ -37,9 +36,9 @@ namespace Interactions.Pickups
             spraying = false;
         }
 
-        public void Trigger(PlayerHand hand, VRBindable bindable, InputWrapper input)
+        public void Trigger(PlayerHand hand, VRBindable bindable, HandInput.InputWrapper input)
         {
-            if (input.action.State())
+            if (input.Down)
             {
                 spraying = true;
             }

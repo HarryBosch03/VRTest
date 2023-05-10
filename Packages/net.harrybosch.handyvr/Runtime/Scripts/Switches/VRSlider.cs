@@ -1,7 +1,7 @@
+using HandyVR.Interactions;
 using UnityEngine;
-using VRTest.Runtime.Scripts.Interactions;
 
-namespace VRTest.Runtime.Scripts.Switches
+namespace HandyVR.Switches
 {
     public sealed class VRSlider : VRBindable
     {
