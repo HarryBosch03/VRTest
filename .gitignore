@@ -7,10 +7,12 @@
 
 # Unity Auto Generated Directories
 [Ll]ibrary/
+[Tt]emp/
 [Ll]ogs/
 [Oo]bj/
 [Bb]uilds/
 [Bb]uild/
+[Bb]uilds/
 
 # Opt in or out depending on whether this is for personal or group work.
 [Uu]ser[Ss]ettings/
