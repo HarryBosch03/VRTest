@@ -42,8 +42,8 @@ namespace HandyVR.Player
         private void Awake()
         {
             // Clear Parent to stop the transform hierarchy from fucking up physics.
-            // TODO - actually test if this actually does anything.
             Target = transform.parent;
+            transform.SetParent(null);
 
             Func<XRController> controller = chirality switch
             {

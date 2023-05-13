@@ -74,7 +74,7 @@ namespace HandyVR.Player.Hands
             //     return;
             // }
 
-            var dir = (hand.Rigidbody.position - detachedBinding.Rigidbody.position);
+            var dir = (hand.PointRef.position - detachedBinding.Rigidbody.position);
             var l = dir.magnitude;
             dir /= l;
 
@@ -183,7 +183,7 @@ namespace HandyVR.Player.Hands
             if (!pointingAt.Rigidbody) return;
 
             detachedBinding = pointingAt;
-            detachedBindingDistance = (hand.Rigidbody.position - detachedBinding.Rigidbody.position).magnitude;
+            detachedBindingDistance = (hand.PointRef.position - detachedBinding.Rigidbody.position).magnitude;
             existingDetachedBindings.Add(detachedBinding);
             Utility.IgnoreCollision(detachedBinding.gameObject, hand.gameObject, true);
         }
