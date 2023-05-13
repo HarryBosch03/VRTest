@@ -36,7 +36,7 @@ namespace HandyVR.Interactions
         public virtual void SetPosition(Vector3 position) => transform.position = position;
         public virtual void SetRotation(Quaternion rotation) => transform.rotation = rotation;
 
-        public VRBinding CreateBinding(float throwForce)
+        public VRBinding CreateBinding(bool flipped)
         {
             return ActiveBinding = new VRBinding(this);
         }

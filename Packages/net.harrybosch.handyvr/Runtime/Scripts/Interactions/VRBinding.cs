@@ -6,7 +6,7 @@ namespace HandyVR.Interactions
     {
         public readonly VRBindable bindable;
         public bool active;
-        
+
         private Vector3 lastPosition;
         
         private Vector3 lastValue;

@@ -9,19 +9,19 @@ namespace HandyVR.Player.Hands
     {
         [SerializeField] private float pickupRange = 0.2f;
         [SerializeField] private float throwForceScale = 1.0f;
-        [SerializeField] private float detachedBindingSpring = 5.0f;
-        [SerializeField] private float detachedBindingDamping = 5.0f;
         [SerializeField] private float detachedBindingAngularDrag = 5.0f;
         [SerializeField] private float maxPointAngle = 15.0f;
 
         private PlayerHand hand;
         private LineRenderer lines;
-        private Vector3 lastHandVelocity;
 
-        private VRBindable pointGrab;
+        private VRBindable detachedBinding;
+        private float detachedBindingDistance;
 
-        private static HashSet<VRBindable> existingPointBindings = new();
+        private static HashSet<VRBindable> existingDetachedBindings = new();
         public VRBinding ActiveBinding { get; private set; }
+        public bool DetachedBinding => detachedBinding;
+        public VRBindable PointingAt { get; private set; }
 
         public void Init(PlayerHand hand)
         {
@@ -33,6 +33,8 @@ namespace HandyVR.Player.Hands
 
         public void Update()
         {
+            PointingAt = null;
+
             hand.Input.Grip.ChangedThisFrame(OnGrip);
 
             if (hand.ActiveBinding)
@@ -42,62 +44,72 @@ namespace HandyVR.Player.Hands
             }
 
             lines.enabled = false;
-            if (pointGrab)
+            if (detachedBinding)
             {
-                lines.SetLine(hand.PointRef.position, pointGrab.Rigidbody.position);
+                lines.SetLine(hand.PointRef.position, detachedBinding.Rigidbody.position);
             }
             else
             {
-                var pointingAt = GetPointingAt();
-                if (pointingAt)
+                PointingAt = GetPointingAt();
+                if (PointingAt)
                 {
-                    lines.SetLine(hand.PointRef.position, pointingAt.transform.position);
+                    lines.SetLine(hand.PointRef.position, PointingAt.transform.position);
                 }
             }
         }
 
         public void FixedUpdate()
         {
-            UpdatePointGrab();
+            UpdateDetachedBinding();
         }
 
-        private void UpdatePointGrab()
+        private void UpdateDetachedBinding()
         {
-            if (!pointGrab) return;
+            if (!detachedBinding) return;
 
-            if ((hand.transform.position - pointGrab.Rigidbody.position).magnitude <
-                (pointGrab.Rigidbody.velocity.magnitude * Time.deltaTime) * 1.01f)
+            // if ((hand.transform.position - detachedBinding.Rigidbody.position).magnitude <
+            //     (detachedBinding.Rigidbody.velocity.magnitude * Time.deltaTime) * 1.01f)
+            // {
+            //     RemoveDetachedBinding(true);
+            //     return;
+            // }
+
+            var dir = (hand.Rigidbody.position - detachedBinding.Rigidbody.position);
+            var l = dir.magnitude;
+            dir /= l;
+
+            var force = Vector3.zero;
+            if (l - detachedBindingDistance > 0.0f)
             {
-                DetachPointGrab(true);
-                return;
+                force = dir * Mathf.Max(l - detachedBindingDistance, 0.0f) / Time.deltaTime;
+
+                var dot = Vector3.Dot(dir, detachedBinding.Rigidbody.velocity);
+                if (dot < 0.0f) detachedBinding.Rigidbody.velocity -= dir * dot;
             }
 
-            var dir = (hand.transform.position - pointGrab.Rigidbody.position).normalized;
-            var force = dir * detachedBindingSpring - pointGrab.Rigidbody.velocity * detachedBindingDamping;
 
-            force += (hand.Rigidbody.velocity - lastHandVelocity) / Time.deltaTime;
-            lastHandVelocity = hand.Rigidbody.velocity;
-            
-            pointGrab.Rigidbody.AddForce(force, ForceMode.Acceleration);
-            pointGrab.Rigidbody.AddTorque(-pointGrab.Rigidbody.angularVelocity * detachedBindingAngularDrag,
+            detachedBinding.Rigidbody.AddForce(force, ForceMode.Acceleration);
+            detachedBinding.Rigidbody.AddTorque(-detachedBinding.Rigidbody.angularVelocity * detachedBindingAngularDrag,
                 ForceMode.Acceleration);
         }
 
-        private void DetachPointGrab(bool bind)
+        private void RemoveDetachedBinding(bool bind)
         {
-            if (!pointGrab) return;
-            Utility.IgnoreCollision(pointGrab.gameObject, hand.gameObject, false);
-            
-            if (bind) Bind(pointGrab);
+            if (!detachedBinding) return;
+            Utility.IgnoreCollision(detachedBinding.gameObject, hand.gameObject, false);
 
-            existingPointBindings.Remove(pointGrab);
-            pointGrab = null;
+            if (bind) Bind(detachedBinding);
+
+            existingDetachedBindings.Remove(detachedBinding);
+            detachedBinding = null;
         }
 
         private void UpdateActiveBinding()
         {
             hand.ActiveBinding.Position = hand.Target.position;
-            hand.ActiveBinding.Rotation = hand.Flipped ? hand.Target.rotation : hand.Target.rotation * Quaternion.Euler(0.0f, 180.0f, 0.0f);
+            hand.ActiveBinding.Rotation = hand.Flipped
+                ? hand.Target.rotation
+                : hand.Target.rotation * Quaternion.Euler(0.0f, 180.0f, 0.0f);
         }
 
         private void Bind(VRBindable pickup)
@@ -108,7 +120,7 @@ namespace HandyVR.Player.Hands
                 hand.ignoreLastBindingCollision = true;
             }
 
-            ActiveBinding = pickup.CreateBinding(throwForceScale);
+            ActiveBinding = pickup.CreateBinding(hand.Flipped);
         }
 
         private VRBindable GetPointingAt()
@@ -119,8 +131,8 @@ namespace HandyVR.Player.Hands
             VRBindable best = null;
             foreach (var other in VRBindable.All)
             {
-                if (existingPointBindings.Contains(other)) continue;
-                
+                if (existingDetachedBindings.Contains(other)) continue;
+
                 var a1 = getAngle(other);
                 if (a1 > maxPointAngle) continue;
                 if (!CanSee(other)) continue;
@@ -147,7 +159,7 @@ namespace HandyVR.Player.Hands
         private void OnGrip(bool state)
         {
             hand.ActiveBinding?.Deactivate();
-            DetachPointGrab(false);
+            RemoveDetachedBinding(false);
 
             if (state) OnGripPressed();
         }
@@ -157,22 +169,23 @@ namespace HandyVR.Player.Hands
             var pickup = VRBindable.GetPickup(hand.transform.position, pickupRange);
             if (!pickup)
             {
-                TryGetPointGrab();
+                TryGetDetachedBinding();
                 return;
             }
 
             Bind(pickup);
         }
 
-        private void TryGetPointGrab()
+        private void TryGetDetachedBinding()
         {
             var pointingAt = GetPointingAt();
             if (!pointingAt) return;
             if (!pointingAt.Rigidbody) return;
 
-            pointGrab = pointingAt;
-            existingPointBindings.Add(pointGrab);
-            Utility.IgnoreCollision(pointGrab.gameObject, hand.gameObject, true);
+            detachedBinding = pointingAt;
+            detachedBindingDistance = (hand.Rigidbody.position - detachedBinding.Rigidbody.position).magnitude;
+            existingDetachedBindings.Add(detachedBinding);
+            Utility.IgnoreCollision(detachedBinding.gameObject, hand.gameObject, true);
         }
     }
 }

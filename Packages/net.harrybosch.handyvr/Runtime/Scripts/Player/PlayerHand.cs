@@ -30,6 +30,8 @@ namespace HandyVR.Player
         private Transform pointRef;
 
         public HandInput Input { get; private set; }
+        public HandBinding BindingController => binding;
+
         public VRBinding ActiveBinding => binding.ActiveBinding;
         public Rigidbody Rigidbody { get; private set; }
         public Transform Target { get; private set; }

@@ -57,5 +57,5 @@ float BlacklightLighting(InputData inputData, SurfaceData surfaceData)
     lightingData.vertexLightingColor += inputData.vertexLighting * surfaceData.albedo;
     #endif
 
-    return value;
+    return clamp(value, 0.0, 1.0);
 }
