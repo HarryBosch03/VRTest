@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace HandyVR.Player.Hands
 {
@@ -9,6 +10,7 @@ namespace HandyVR.Player.Hands
     public class HandMovement
     {
         [SerializeField] [Range(0.0f, 1.0f)] private float rumbleMagnitude;
+        [SerializeField] [Range(0.0f, 1.0f)] private float forceScaling = 1.0f;
 
         private PlayerHand hand;
 
@@ -40,7 +42,7 @@ namespace HandyVR.Player.Hands
                 hand.transform.rotation = newRotation;
                 return;
             }
-            
+
             CheckIgnoreLastBindingCollision();
 
             rb.isKinematic = false;
@@ -49,13 +51,13 @@ namespace HandyVR.Player.Hands
             // Add a force that effectively cancels out the current velocity, and translates the hand to the target position.
             // Using a force instead is purely for collision and stability, MovePosition ended up causing horrific desync.
             var force = (newPosition - rb.position) / Time.deltaTime - rb.velocity;
-            rb.AddForce(force, ForceMode.VelocityChange);
+            rb.AddForce(force * forceScaling, ForceMode.VelocityChange);
 
             // Do the same with a torque, match the current target rotation.
             var delta = newRotation * Quaternion.Inverse(rb.rotation);
             delta.ToAngleAxis(out var angle, out var axis);
             var torque = axis * (angle * Mathf.Deg2Rad / Time.deltaTime) - rb.angularVelocity;
-            rb.AddTorque(torque, ForceMode.VelocityChange);
+            rb.AddTorque(torque * forceScaling, ForceMode.VelocityChange);
         }
 
         public void OnCollision(Collision collision)

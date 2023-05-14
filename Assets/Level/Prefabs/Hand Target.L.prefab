@@ -1420,6 +1420,7 @@ MonoBehaviour:
   flipAxis: {x: 1, y: 0, z: 0}
   movement:
     rumbleMagnitude: 0.2
+    forceScaling: 0.3
   binding:
     pickupRange: 0.2
     throwForceScale: 1
@@ -1440,6 +1441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cursor: {fileID: 5766851429393977619}
+  scrollSpeed: 1000
 --- !u!1 &8468296115083233522
 GameObject:
   m_ObjectHideFlags: 0

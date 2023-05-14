@@ -66,6 +66,12 @@ namespace HandyVR.Player.Hands
         {
             if (!DetachedBinding) return;
 
+            if (DetachedBinding.ActiveBinding)
+            {
+                RemoveDetachedBinding(false);
+                return;
+            }
+
             var dir = (hand.PointRef.position - DetachedBinding.Rigidbody.position);
             var l = dir.magnitude;
             dir /= l;
@@ -117,29 +123,13 @@ namespace HandyVR.Player.Hands
 
         private VRBindable GetPointingAt()
         {
-            float getAngle(Component pickup) => Vector3.Angle(pickup.transform.position - hand.PointRef.position,
-                hand.PointRef.forward);
+            var ray = new Ray(hand.PointRef.position, hand.PointRef.forward);
+            if (!Physics.Raycast(ray, out var hit)) return null;
+            if (!hit.transform.TryGetComponent(out VRBindable bindable)) return null;
+            if (existingDetachedBindings.Contains(bindable)) return null;
+            if (bindable.ActiveBinding) return null;
 
-            VRBindable best = null;
-            foreach (var other in VRBindable.All)
-            {
-                if (existingDetachedBindings.Contains(other)) continue;
-
-                var a1 = getAngle(other);
-                if (a1 > maxPointAngle) continue;
-                if (!CanSee(other)) continue;
-                if (!best)
-                {
-                    best = other;
-                    continue;
-                }
-
-                var a2 = getAngle(best);
-                if (a1 > a2) continue;
-                best = other;
-            }
-
-            return best;
+            return bindable;
         }
 
         private bool CanSee(VRBindable other)
@@ -173,6 +163,8 @@ namespace HandyVR.Player.Hands
             var pointingAt = GetPointingAt();
             if (!pointingAt) return;
             if (!pointingAt.Rigidbody) return;
+            if (pointingAt.ActiveBinding) return;
+            if (existingDetachedBindings.Contains(pointingAt)) return;
 
             DetachedBinding = pointingAt;
             detachedBindingDistance = (hand.PointRef.position - DetachedBinding.Rigidbody.position).magnitude;

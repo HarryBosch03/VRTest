@@ -4,6 +4,7 @@ using HandyVR.Player.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.Serialization;
 
 namespace HandyVR.Input.UI
 {
@@ -11,12 +12,15 @@ namespace HandyVR.Input.UI
     public class XRPointer : MonoBehaviour
     {
         [SerializeField] private GameObject cursor;
+        [SerializeField] private float scrollSpeed = 1000.0f;
         
         private ExtendedPointerEventData pointerData;
         private PlayerHand hand;
 
         public HandInput.InputWrapper TriggerAction => hand.Input.Trigger;
         public HandInput.InputWrapper GripAction => hand.Input.Grip;
+        public HandInput.InputWrapper ThumbstickXAction => hand.Input.ThumbstickX;
+        public HandInput.InputWrapper ThumbstickYAction => hand.Input.ThumbstickY;
         public Transform PointRef => hand.PointRef;
         public static List<XRPointer> All { get; } = new ();
 
@@ -61,6 +65,7 @@ namespace HandyVR.Input.UI
             pointerData.trackedDeviceOrientation = PointRef.rotation;
             pointerData.pointerType = UIPointerType.Tracked;
             pointerData.button = PointerEventData.InputButton.Left;
+            pointerData.scrollDelta = new Vector2(-ThumbstickXAction.Value, ThumbstickYAction.Value) * scrollSpeed * Time.deltaTime;
             
             return pointerData;
         }

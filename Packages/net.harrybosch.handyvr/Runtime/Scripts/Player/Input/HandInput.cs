@@ -16,6 +16,8 @@ namespace HandyVR.Player.Input
 
         public InputWrapper Grip { get; } = new();
         public InputWrapper Trigger { get; } = new();
+        public InputWrapper ThumbstickX { get; } = new() { pressPoint = 0.1f, };
+        public InputWrapper ThumbstickY { get; } = new() { pressPoint = 0.1f, };
 
         public HandInput(Func<XRController> controller)
         {
@@ -35,10 +37,14 @@ namespace HandyVR.Player.Input
                 case OculusTouchController touchController:
                     Grip.Update(touchController.grip);
                     Trigger.Update(touchController.trigger);
+                    ThumbstickX.Update(touchController.thumbstick, v => v.x);
+                    ThumbstickY.Update(touchController.thumbstick, v => v.y);
                     break;
                 case UnityEngine.XR.OpenXR.Features.Interactions.OculusTouchControllerProfile.OculusTouchController touchController:
                     Grip.Update(touchController.grip);
                     Trigger.Update(touchController.trigger);
+                    ThumbstickX.Update(touchController.thumbstick, v => v.x);
+                    ThumbstickY.Update(touchController.thumbstick, v => v.y);
                     break;
             }
         }
@@ -60,9 +66,10 @@ namespace HandyVR.Player.Input
 
             public float Value { get; private set; }
             public InputState State { get; private set; }
-            public bool Down => Value > pressPoint;
+            public bool Down => Mathf.Abs(Value) > pressPoint;
 
             public void Update(InputControl<float> driver) => Update(driver.ReadValue());
+            public void Update<T>(InputControl<T> driver, Func<T, float> getFloat) where T : struct => Update(getFloat(driver.ReadValue()));
             public void Update(float value)
             {
                 Value = value;
