@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace HandyVR.Player.Hands
@@ -9,9 +10,9 @@ namespace HandyVR.Player.Hands
     public class HandMovement
     {
         [SerializeField] [Range(0.0f, 1.0f)] private float rumbleMagnitude;
-        
+
         private PlayerHand hand;
-        
+
         public void Init(PlayerHand hand)
         {
             this.hand = hand;
@@ -40,7 +41,7 @@ namespace HandyVR.Player.Hands
                 hand.transform.rotation = newRotation;
                 return;
             }
-
+            
             CheckIgnoreLastBindingCollision();
 
             rb.isKinematic = false;
@@ -54,8 +55,8 @@ namespace HandyVR.Player.Hands
             // Do the same with a torque, match the current target rotation.
             var delta = newRotation * Quaternion.Inverse(rb.rotation);
             delta.ToAngleAxis(out var angle, out var axis);
-            var torque = axis * (angle * Mathf.Deg2Rad / Time.deltaTime)- rb.angularVelocity;
-            rb.AddTorque(torque , ForceMode.VelocityChange);
+            var torque = axis * (angle * Mathf.Deg2Rad / Time.deltaTime) - rb.angularVelocity;
+            rb.AddTorque(torque, ForceMode.VelocityChange);
         }
 
         public void OnCollision(Collision collision)
@@ -74,7 +75,7 @@ namespace HandyVR.Player.Hands
             // "not colling" and re-enable collision, causing the held object to loose,
             // its thrown velocity by colliding with the hand on its way out.
             if (!hand.handModel.gameObject.activeInHierarchy) return;
-            
+
             // Check we have a last bound object, and we are actually ignoring its collision.
             if (!hand.ignoreLastBindingCollision) return;
             if (hand.ActiveBinding == null) return;
@@ -96,12 +97,13 @@ namespace HandyVR.Player.Hands
                     collided = true;
                     break;
                 }
+
                 if (collided) break;
             }
-            
-            
+
+
             if (collided) return;
-            
+
             hand.ignoreLastBindingCollision = false;
             Utility.IgnoreCollision(hand.ActiveBinding.bindable.gameObject, hand.gameObject, false);
         }

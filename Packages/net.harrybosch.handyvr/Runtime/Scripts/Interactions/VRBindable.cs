@@ -15,9 +15,11 @@ namespace HandyVR.Interactions
 
         public static readonly List<VRBindable> All = new();
 
+        public virtual Rigidbody GetRigidbody() => GetComponent<Rigidbody>();
+        
         protected virtual void Awake()
         {
-            Rigidbody = GetComponent<Rigidbody>();
+            Rigidbody = GetRigidbody();
 
             Handle = transform.DeepFind("Handle");
             if (!Handle) Handle = transform;

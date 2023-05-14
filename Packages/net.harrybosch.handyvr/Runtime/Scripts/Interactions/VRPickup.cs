@@ -72,10 +72,10 @@ namespace HandyVR.Interactions
             BindingDeactiveEvent?.Invoke();
         }
 
+        public override Rigidbody GetRigidbody() => gameObject.GetOrAddComponent<Rigidbody>();
+
         protected override void Awake()
         {
-            gameObject.GetOrAddComponent<Rigidbody>();
-            
             base.Awake();
 
             Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;

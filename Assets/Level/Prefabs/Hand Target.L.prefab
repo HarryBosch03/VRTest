@@ -274,7 +274,7 @@ GameObject:
   - component: {fileID: 8334570694368333380}
   - component: {fileID: 7569473479828443921}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: Dislocation Reference - Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -818,7 +818,7 @@ GameObject:
   - component: {fileID: 5204468512885165908}
   - component: {fileID: 3204947581146634191}
   m_Layer: 0
-  m_Name: Cursor
+  m_Name: UI Cursor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -900,9 +900,8 @@ GameObject:
   - component: {fileID: 7497958342521983501}
   - component: {fileID: 6241851259295810629}
   - component: {fileID: 6015403147596022354}
-  - component: {fileID: 1952992554003957675}
   m_Layer: 0
-  m_Name: Sphere (1)
+  m_Name: Dislocation Reference - Actual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -915,13 +914,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5800530707023538392}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 8468296114562725171}
-  m_RootOrder: 4
+  m_Father: {fileID: 8468296115083233523}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6241851259295810629
 MeshFilter:
@@ -973,19 +972,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &1952992554003957675
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5800530707023538392}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6075395490774000428
 GameObject:
   m_ObjectHideFlags: 0
@@ -1414,7 +1400,6 @@ Transform:
   - {fileID: 2360459348999794806}
   - {fileID: 6292971788821796202}
   - {fileID: 8468296115392732625}
-  - {fileID: 7497958342521983501}
   m_Father: {fileID: 8468296115083233523}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1438,8 +1423,6 @@ MonoBehaviour:
   binding:
     pickupRange: 0.2
     throwForceScale: 1
-    detachedBindingSpring: 40
-    detachedBindingDamping: 8
     detachedBindingAngularDrag: 5
     maxPointAngle: 15
   handModel: {fileID: 0}
@@ -1487,6 +1470,7 @@ Transform:
   m_Children:
   - {fileID: 8468296114562725171}
   - {fileID: 4063907286024147393}
+  - {fileID: 7497958342521983501}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

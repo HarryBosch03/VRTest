@@ -15,12 +15,11 @@ namespace HandyVR.Player.Hands
         private PlayerHand hand;
         private LineRenderer lines;
 
-        private VRBindable detachedBinding;
         private float detachedBindingDistance;
 
         private static HashSet<VRBindable> existingDetachedBindings = new();
         public VRBinding ActiveBinding { get; private set; }
-        public bool DetachedBinding => detachedBinding;
+        public VRBindable DetachedBinding { get; private set; }
         public VRBindable PointingAt { get; private set; }
 
         public void Init(PlayerHand hand)
@@ -44,9 +43,9 @@ namespace HandyVR.Player.Hands
             }
 
             lines.enabled = false;
-            if (detachedBinding)
+            if (DetachedBinding)
             {
-                lines.SetLine(hand.PointRef.position, detachedBinding.Rigidbody.position);
+                lines.SetLine(hand.PointRef.position, DetachedBinding.Rigidbody.position);
             }
             else
             {
@@ -65,16 +64,9 @@ namespace HandyVR.Player.Hands
 
         private void UpdateDetachedBinding()
         {
-            if (!detachedBinding) return;
+            if (!DetachedBinding) return;
 
-            // if ((hand.transform.position - detachedBinding.Rigidbody.position).magnitude <
-            //     (detachedBinding.Rigidbody.velocity.magnitude * Time.deltaTime) * 1.01f)
-            // {
-            //     RemoveDetachedBinding(true);
-            //     return;
-            // }
-
-            var dir = (hand.PointRef.position - detachedBinding.Rigidbody.position);
+            var dir = (hand.PointRef.position - DetachedBinding.Rigidbody.position);
             var l = dir.magnitude;
             dir /= l;
 
@@ -83,25 +75,25 @@ namespace HandyVR.Player.Hands
             {
                 force = dir * Mathf.Max(l - detachedBindingDistance, 0.0f) / Time.deltaTime;
 
-                var dot = Vector3.Dot(dir, detachedBinding.Rigidbody.velocity);
-                if (dot < 0.0f) detachedBinding.Rigidbody.velocity -= dir * dot;
+                var dot = Vector3.Dot(dir, DetachedBinding.Rigidbody.velocity);
+                if (dot < 0.0f) force -= dir * dot;
             }
 
 
-            detachedBinding.Rigidbody.AddForce(force, ForceMode.Acceleration);
-            detachedBinding.Rigidbody.AddTorque(-detachedBinding.Rigidbody.angularVelocity * detachedBindingAngularDrag,
+            DetachedBinding.Rigidbody.AddForce(force, ForceMode.VelocityChange);
+            DetachedBinding.Rigidbody.AddTorque(-DetachedBinding.Rigidbody.angularVelocity * detachedBindingAngularDrag,
                 ForceMode.Acceleration);
         }
 
         private void RemoveDetachedBinding(bool bind)
         {
-            if (!detachedBinding) return;
-            Utility.IgnoreCollision(detachedBinding.gameObject, hand.gameObject, false);
+            if (!DetachedBinding) return;
+            Utility.IgnoreCollision(DetachedBinding.gameObject, hand.gameObject, false);
 
-            if (bind) Bind(detachedBinding);
+            if (bind) Bind(DetachedBinding);
 
-            existingDetachedBindings.Remove(detachedBinding);
-            detachedBinding = null;
+            existingDetachedBindings.Remove(DetachedBinding);
+            DetachedBinding = null;
         }
 
         private void UpdateActiveBinding()
@@ -182,10 +174,10 @@ namespace HandyVR.Player.Hands
             if (!pointingAt) return;
             if (!pointingAt.Rigidbody) return;
 
-            detachedBinding = pointingAt;
-            detachedBindingDistance = (hand.PointRef.position - detachedBinding.Rigidbody.position).magnitude;
-            existingDetachedBindings.Add(detachedBinding);
-            Utility.IgnoreCollision(detachedBinding.gameObject, hand.gameObject, true);
+            DetachedBinding = pointingAt;
+            detachedBindingDistance = (hand.PointRef.position - DetachedBinding.Rigidbody.position).magnitude;
+            existingDetachedBindings.Add(DetachedBinding);
+            Utility.IgnoreCollision(DetachedBinding.gameObject, hand.gameObject, true);
         }
     }
 }
