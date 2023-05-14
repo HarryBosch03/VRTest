@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using HandyVR.Player;
 using HandyVR.Player.Input;
