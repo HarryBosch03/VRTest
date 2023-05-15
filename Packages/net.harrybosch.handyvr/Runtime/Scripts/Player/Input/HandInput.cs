@@ -39,6 +39,9 @@ namespace HandyVR.Player.Input
                     Trigger.Update(touchController.trigger);
                     ThumbstickX.Update(touchController.thumbstick, v => v.x);
                     ThumbstickY.Update(touchController.thumbstick, v => v.y);
+                    
+                    Rotation *= Quaternion.Euler(-45.0f, 0.0f, 0.0f);
+                    
                     break;
                 case UnityEngine.XR.OpenXR.Features.Interactions.OculusTouchControllerProfile.OculusTouchController touchController:
                     Grip.Update(touchController.grip);

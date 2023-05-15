@@ -22,6 +22,11 @@ namespace HandyVR.Interactions
             set => bindable.SetRotation(value);
         }
 
+        public bool Flipped
+        {
+            set => bindable.SetFlipped(value);
+        }
+
         public VRBinding(VRBindable bindable)
         {
             if (bindable.ActiveBinding) bindable.ActiveBinding.Deactivate();

@@ -1423,9 +1423,8 @@ MonoBehaviour:
     forceScaling: 0.3
   binding:
     pickupRange: 0.2
-    throwForceScale: 1
     detachedBindingAngularDrag: 5
-    maxPointAngle: 15
+    detachedBindingBounce: 0.3
   handModel: {fileID: 0}
   ignoreLastBindingCollision: 0
 --- !u!114 &3624446681784877749

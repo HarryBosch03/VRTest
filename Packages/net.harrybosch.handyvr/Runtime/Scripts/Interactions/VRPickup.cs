@@ -16,6 +16,7 @@ namespace HandyVR.Interactions
         
         private Vector3 tPosition;
         private Quaternion tRotation;
+        private bool tFlipped;
 
         public event Action BindingActiveEvent;
         public event Action BindingDeactiveEvent;
@@ -41,15 +42,9 @@ namespace HandyVR.Interactions
         
         public VRBindingType BindingType => bindingType;
 
-        public override void SetPosition(Vector3 position)
-        {
-            tPosition = position;
-        }
-
-        public override void SetRotation(Quaternion rotation)
-        {
-            tRotation = rotation;
-        }
+        public override void SetPosition(Vector3 position) => tPosition = position;
+        public override void SetRotation(Quaternion rotation) => tRotation = rotation;
+        public override void SetFlipped(bool flipped) => tFlipped = flipped;
 
         public override void OnBindingActivated()
         {
@@ -80,6 +75,7 @@ namespace HandyVR.Interactions
 
             Rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             Rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+            Rigidbody.drag = 0.5f;
 
             var colliders = GetComponentsInChildren<Collider>();
             foreach (var collider in colliders)
@@ -100,7 +96,8 @@ namespace HandyVR.Interactions
             var force = (tPosition + pOffset - Rigidbody.position) / Time.deltaTime - Rigidbody.velocity;
             Rigidbody.AddForce(force, ForceMode.VelocityChange);
 
-            var delta = tRotation * rOffset.normalized * Quaternion.Inverse(Rigidbody.rotation);
+            var offset = rOffset.normalized;
+            var delta = tRotation * offset * Quaternion.Inverse(Rigidbody.rotation);
             delta.ToAngleAxis(out var angle, out var axis);
             var torque = axis * (angle * Mathf.Deg2Rad / Time.deltaTime) - Rigidbody.angularVelocity;
             Rigidbody.AddTorque(torque, ForceMode.VelocityChange);

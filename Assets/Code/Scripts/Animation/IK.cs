@@ -5,10 +5,12 @@ namespace Animation
     [System.Serializable]
     public class IK
     {
+        public const int DefaultIterations = 50;
+        
         [SerializeField] [HideInInspector] private Transform[] joints;
         [SerializeField] [HideInInspector] private float[] lengths;
 
-        public int iterations = 50;
+        public int iterations;
 
         private Vector3[] points;
 
@@ -20,6 +22,12 @@ namespace Animation
             {
                 lengths[i] = (joints[i + 1].position - joints[i].position).magnitude;
             }
+        }
+
+        public IK Iterations(int val)
+        {
+            iterations = val;
+            return this;
         }
 
         private void Pass(Vector3 point, System.Func<int, int> index, System.Func<int, float> lengths)

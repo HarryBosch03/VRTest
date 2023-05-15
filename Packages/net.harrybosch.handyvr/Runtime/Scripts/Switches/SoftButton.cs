@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace HandyVR.Switches
 {
+    [Obsolete]
     [SelectionBase]
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-10)]
@@ -32,6 +34,9 @@ namespace HandyVR.Switches
         private void Awake()
         {
             actuationBody = transform.GetChild(0);
+            
+            // OBSOLETE - DO NOT USE - IF IN USE, FUCK OFF
+            Destroy(gameObject);
         }
 
         private void FixedUpdate()

@@ -82,7 +82,7 @@ namespace HandyVR.Player
             Input.Update();
             Target.position = Input.Position;
             Target.rotation = Input.Rotation;
-
+            
             if (ActiveBinding)
             {
                 handModel.gameObject.SetActive(false);

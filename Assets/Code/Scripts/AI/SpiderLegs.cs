@@ -9,6 +9,8 @@ namespace AI
     [DisallowMultipleComponent]
     public sealed class SpiderLegs : MonoBehaviour
     {
+        public const int DefaultIKIterations = 10;
+        
         [SerializeField] private float stepDistance = 0.1f;
         [SerializeField] private float smoothTime = 0.1f;
         [SerializeField] private float legLift = 0.01f;
@@ -113,7 +115,7 @@ namespace AI
                 mid = root.GetChild(0);
                 tip = mid.GetChild(0);
 
-                ik = new IK(root, mid, tip);
+                ik = new IK(root, mid, tip).Iterations(DefaultIKIterations);
 
                 start = center.InverseTransformPoint(root.position);
                 localOffset = center.InverseTransformVector(tip.position - center.position);

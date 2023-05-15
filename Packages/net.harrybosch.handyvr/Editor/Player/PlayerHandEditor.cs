@@ -1,9 +1,10 @@
+using HandyVR;
 using HandyVR.Player;
 using UnityEditor;
 using UnityEngine;
 using UEditor = UnityEditor.Editor;
 
-namespace HandyVR.Editor.Player
+namespace HandyVREditor.Player
 {
     [CustomEditor(typeof(PlayerHand))]
     public class PlayerHandEditor : UEditor

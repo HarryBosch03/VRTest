@@ -4,7 +4,6 @@ using HandyVR.Player.Input;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
-using UnityEngine.Serialization;
 
 namespace HandyVR.Input.UI
 {

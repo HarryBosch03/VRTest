@@ -8,9 +8,8 @@ namespace HandyVR.Player.Hands
     public class HandBinding
     {
         [SerializeField] private float pickupRange = 0.2f;
-        [SerializeField] private float throwForceScale = 1.0f;
         [SerializeField] private float detachedBindingAngularDrag = 5.0f;
-        [SerializeField] private float maxPointAngle = 15.0f;
+        [SerializeField] [Range(0.0f, 1.0f)] private float detachedBindingBounce = 0.3f;
 
         private PlayerHand hand;
         private LineRenderer lines;
@@ -82,7 +81,7 @@ namespace HandyVR.Player.Hands
                 force = dir * Mathf.Max(l - detachedBindingDistance, 0.0f) / Time.deltaTime;
 
                 var dot = Vector3.Dot(dir, DetachedBinding.Rigidbody.velocity);
-                if (dot < 0.0f) force -= dir * dot;
+                if (dot < 0.0f) force -= dir * dot * (1.0f + detachedBindingBounce);
             }
 
 
@@ -105,9 +104,8 @@ namespace HandyVR.Player.Hands
         private void UpdateActiveBinding()
         {
             hand.ActiveBinding.Position = hand.Target.position;
-            hand.ActiveBinding.Rotation = hand.Flipped
-                ? hand.Target.rotation
-                : hand.Target.rotation * Quaternion.Euler(0.0f, 180.0f, 0.0f);
+            hand.ActiveBinding.Rotation = hand.Target.rotation;
+            hand.ActiveBinding.Flipped = hand.Flipped;
         }
 
         private void Bind(VRBindable pickup)
