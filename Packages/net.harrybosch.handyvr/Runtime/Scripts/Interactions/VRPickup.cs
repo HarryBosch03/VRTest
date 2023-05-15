@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace HandyVR.Interactions
 {
@@ -11,6 +12,8 @@ namespace HandyVR.Interactions
         [SerializeField] private VRBindingType bindingType;
         [SerializeField] private Vector3 pOffset;
         [SerializeField] private Quaternion rOffset = Quaternion.identity;
+        [SerializeField] private bool flipWithHand;
+        [SerializeField] private Quaternion flipROffset = Quaternion.identity;
 
         private readonly List<ColliderData> colliderData = new();
         
@@ -97,6 +100,9 @@ namespace HandyVR.Interactions
             Rigidbody.AddForce(force, ForceMode.VelocityChange);
 
             var offset = rOffset.normalized;
+            if (flipWithHand && tFlipped) offset = flipROffset;
+            
+            //var delta = Utility.Quaternion.Difference(rOffset.normalized * tRotation, Rigidbody.rotation);
             var delta = tRotation * offset * Quaternion.Inverse(Rigidbody.rotation);
             delta.ToAngleAxis(out var angle, out var axis);
             var torque = axis * (angle * Mathf.Deg2Rad / Time.deltaTime) - Rigidbody.angularVelocity;

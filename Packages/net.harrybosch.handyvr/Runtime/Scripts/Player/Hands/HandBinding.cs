@@ -84,7 +84,6 @@ namespace HandyVR.Player.Hands
                 if (dot < 0.0f) force -= dir * dot * (1.0f + detachedBindingBounce);
             }
 
-
             DetachedBinding.Rigidbody.AddForce(force, ForceMode.VelocityChange);
             DetachedBinding.Rigidbody.AddTorque(-DetachedBinding.Rigidbody.angularVelocity * detachedBindingAngularDrag,
                 ForceMode.Acceleration);
