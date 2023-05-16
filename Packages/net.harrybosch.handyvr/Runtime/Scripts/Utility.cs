@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace HandyVR
 {
@@ -30,6 +32,40 @@ namespace HandyVR
 
                 return b2 * UnityEngine.Quaternion.Inverse(a2);
             }
+        }
+
+        public static bool Best<T>(IEnumerable<T> list, out T best, Func<T, float> getScore, float startingScore = 0.0f)
+        {
+            best = default;
+            var result = false;
+            var bestScore = startingScore;
+            foreach (var element in list)
+            {
+                var score = getScore(element);
+                if (score < bestScore) continue;
+
+                best = element;
+                bestScore = score;
+                result = true;
+            }
+
+            return result;
+        }
+        
+        public static T Best<T>(IEnumerable<T> list, Func<T, float> getScore, float startingScore = 0.0f) where T : class
+        {
+            T best = null;
+            var bestScore = startingScore;
+            foreach (var element in list)
+            {
+                var score = getScore(element);
+                if (score < bestScore) continue;
+
+                best = element;
+                bestScore = score;
+            }
+
+            return best;
         }
     }
 }

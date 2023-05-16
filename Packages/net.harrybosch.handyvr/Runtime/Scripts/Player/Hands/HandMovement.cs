@@ -26,7 +26,7 @@ namespace HandyVR.Player.Hands
             rb.angularDrag = 0.0f;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
-            rb.mass = 0.05f;
+            rb.mass = 0.01f;
         }
 
         public void MoveTo(Vector3 newPosition, Quaternion newRotation)

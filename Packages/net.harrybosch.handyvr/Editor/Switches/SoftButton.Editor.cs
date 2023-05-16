@@ -1,5 +1,4 @@
-﻿using System;
-using HandyVR.Switches;
+﻿using HandyVR.Switches;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;

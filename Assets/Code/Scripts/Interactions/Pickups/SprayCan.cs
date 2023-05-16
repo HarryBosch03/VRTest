@@ -3,6 +3,7 @@ using HandyVR.Interactions.Pickups;
 using HandyVR.Player;
 using HandyVR.Player.Input;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Interactions.Pickups
 {
@@ -11,6 +12,7 @@ namespace Interactions.Pickups
     {
         [SerializeField] private ParticleSystem spray;
         [SerializeField] private ParticleSystem residue;
+        [SerializeField] private float sprayDistance;
 
         private bool spraying;
 
@@ -40,6 +42,11 @@ namespace Interactions.Pickups
             spraying = false;
         }
 
+        private static float ScoringMethod(RaycastHit hit)
+        {
+            return 1.0f / hit.distance;
+        }
+        
         private void SpawnResidue()
         {
             var numAlive = spray.GetParticles(sprayBuffer);
@@ -48,12 +55,14 @@ namespace Interactions.Pickups
             var reference = sprayBuffer[Random.Range(0, numAlive)];
 
             var ray = new Ray(spray.transform.position, reference.velocity);
-            var distance = (reference.startLifetime * reference.velocity).magnitude;
-            if (!Physics.Raycast(ray, out var hit, distance)) return;
+            var hits = Physics.RaycastAll(ray, sprayDistance);
+            if (hits.Length == 0) return;
+
+            if (!HandyVR.Utility.Best(hits, out var hit, ScoringMethod, 0.0f)) return;
 
             var emitParams = new ParticleSystem.EmitParams();
             emitParams.position = hit.point;
-            spray.Emit(emitParams, 1);
+            residue.Emit(emitParams, 1);
         }
 
         public void Trigger(PlayerHand hand, VRBindable bindable, HandInput.InputWrapper input)
@@ -62,6 +71,12 @@ namespace Interactions.Pickups
             {
                 spraying = true;
             }
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (!spray) return;
+            Gizmos.DrawRay(spray.transform.position, spray.transform.forward * sprayDistance);
         }
     }
 }

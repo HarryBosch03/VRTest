@@ -1109,7 +1109,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ddb5565730f97f5469efbf2377bc68a7, type: 2}
+  - {fileID: 2100000, guid: de5dcb9e5152b7f48b90206b8d6536fb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1423,8 +1423,8 @@ MonoBehaviour:
     forceScaling: 0.3
   binding:
     pickupRange: 0.2
-    detachedBindingAngularDrag: 5
-    detachedBindingBounce: 0.3
+    detachedBindingAngle: 15
+    detachedBindingForce: 4
   handModel: {fileID: 0}
   ignoreLastBindingCollision: 0
 --- !u!114 &3624446681784877749
@@ -1499,7 +1499,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8468296115392732624}
   m_LocalRotation: {x: 0.60876137, y: 0, z: 0, w: 0.7933534}
-  m_LocalPosition: {x: 0, y: -0.11132309, z: 0.031090565}
+  m_LocalPosition: {x: 0, y: -0.1154, z: 0.0322}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

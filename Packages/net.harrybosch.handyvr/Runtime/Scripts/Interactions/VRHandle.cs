@@ -7,9 +7,8 @@ namespace HandyVR.Interactions
     [DisallowMultipleComponent]
     public sealed class VRHandle : VRBindable
     {
-        [SerializeField] private HandleBehaviour behaviour;
-        [SerializeField] private float grabSpring = 25.0f;
-        [SerializeField] private float grabDamper = 5.0f;
+        [SerializeField] private float grabSpring = 500.0f;
+        [SerializeField] private float grabDamper = 25.0f;
 
         private bool wasBound;
         private Vector3 grabTarget;
@@ -32,21 +31,9 @@ namespace HandyVR.Interactions
 
             var diff = (grabTarget - Handle.position);
             var pointVelocity = Rigidbody.GetPointVelocity(Handle.position);
-
-            var force = behaviour switch
-            {
-                HandleBehaviour.LockTo => (diff / Time.deltaTime - pointVelocity) / Time.deltaTime,
-                HandleBehaviour.SpringDamper => diff * grabSpring - pointVelocity * grabDamper,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
+            var force = diff * grabSpring - pointVelocity * grabDamper;
+            
             Rigidbody.AddForceAtPosition(force, Handle.position, ForceMode.Acceleration);
-        }
-
-        private enum HandleBehaviour
-        {
-            LockTo = default,
-            SpringDamper,
         }
     }
 }

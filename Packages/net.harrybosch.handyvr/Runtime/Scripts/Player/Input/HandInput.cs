@@ -9,13 +9,14 @@ namespace HandyVR.Player.Input
     public sealed class HandInput
     {
         private const float RumbleFrequency = 20.0f;
-        
+
         public Func<XRController> Controller { get; }
         public Vector3 Position { get; private set; }
         public Quaternion Rotation { get; private set; }
 
         public InputWrapper Grip { get; } = new();
         public InputWrapper Trigger { get; } = new();
+        public InputWrapper Primary { get; } = new();
         public InputWrapper ThumbstickX { get; } = new() { pressPoint = 0.1f, };
         public InputWrapper ThumbstickY { get; } = new() { pressPoint = 0.1f, };
 
@@ -23,14 +24,27 @@ namespace HandyVR.Player.Input
         {
             Controller = controller;
         }
-        
+
         public void Update()
         {
+#if UNITY_EDITOR
+            Primary.ChangedThisFrame(v =>
+            {
+                if (!v) return;
+                UnityEditor.EditorApplication.isPaused = true;
+            });
+#endif
+
             var controller = Controller();
             if (controller == null) return;
 
-            Position = controller.devicePosition.ReadValue();
-            Rotation = controller.deviceRotation.ReadValue();
+#if UNITY_EDITOR
+            if (!UnityEditor.EditorApplication.isPaused)
+#endif
+            {
+                Position = controller.devicePosition.ReadValue();
+                Rotation = controller.deviceRotation.ReadValue();
+            }
 
             switch (controller)
             {
@@ -39,15 +53,18 @@ namespace HandyVR.Player.Input
                     Trigger.Update(touchController.trigger);
                     ThumbstickX.Update(touchController.thumbstick, v => v.x);
                     ThumbstickY.Update(touchController.thumbstick, v => v.y);
-                    
+                    Primary.Update(touchController.primaryButton);
+
                     Rotation *= Quaternion.Euler(-45.0f, 0.0f, 0.0f);
-                    
+
                     break;
-                case UnityEngine.XR.OpenXR.Features.Interactions.OculusTouchControllerProfile.OculusTouchController touchController:
+                case UnityEngine.XR.OpenXR.Features.Interactions.OculusTouchControllerProfile.OculusTouchController
+                    touchController:
                     Grip.Update(touchController.grip);
                     Trigger.Update(touchController.trigger);
                     ThumbstickX.Update(touchController.thumbstick, v => v.x);
                     ThumbstickY.Update(touchController.thumbstick, v => v.y);
+                    Primary.Update(touchController.primaryButton);
                     break;
             }
         }
@@ -60,7 +77,7 @@ namespace HandyVR.Player.Input
                 rumble.SendImpulse(amplitude, 1.0f / RumbleFrequency);
             }
         }
-        
+
         public class InputWrapper
         {
             public float pressPoint = 0.5f;
@@ -72,11 +89,18 @@ namespace HandyVR.Player.Input
             public bool Down => Mathf.Abs(Value) > pressPoint;
 
             public void Update(InputControl<float> driver) => Update(driver.ReadValue());
-            public void Update<T>(InputControl<T> driver, Func<T, float> getFloat) where T : struct => Update(getFloat(driver.ReadValue()));
+
+            public void Update<T>(InputControl<T> driver, Func<T, float> getFloat) where T : struct =>
+                Update(getFloat(driver.ReadValue()));
+
             public void Update(float value)
             {
+#if UNITY_EDITOR
+                if (UnityEditor.EditorApplication.isPaused) value = Value;
+#endif
+
                 Value = value;
-                
+
                 var state = Value > pressPoint;
                 var lastState = lastValue > pressPoint;
 
@@ -88,16 +112,16 @@ namespace HandyVR.Player.Input
                 {
                     State = lastState ? InputState.ReleasedThisFrame : InputState.Released;
                 }
-                
+
                 lastValue = Value;
             }
-            
+
             public enum InputState
             {
-                PressedThisFrame,
-                Pressed,
-                ReleasedThisFrame,
                 Released,
+                ReleasedThisFrame,
+                Pressed,
+                PressedThisFrame,
             }
 
             public void ChangedThisFrame(Action<bool> callback)

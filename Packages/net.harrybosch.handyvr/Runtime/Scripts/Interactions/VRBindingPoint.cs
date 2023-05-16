@@ -43,7 +43,7 @@ namespace HandyVR.Interactions
                 if (pickup.ActiveBinding) continue;
                 if (!Filter(pickup)) continue;
 
-                activeBinding = pickup.CreateBinding(false);
+                activeBinding = pickup.CreateBinding();
                 
                 break;
             }

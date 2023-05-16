@@ -39,7 +39,7 @@ namespace HandyVR.Interactions
         public virtual void SetRotation(Quaternion rotation) => transform.rotation = rotation;
         public virtual void SetFlipped(bool flipped) { }
 
-        public VRBinding CreateBinding(bool flipped)
+        public VRBinding CreateBinding()
         {
             return ActiveBinding = new VRBinding(this);
         }

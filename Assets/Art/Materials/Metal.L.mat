@@ -100,7 +100,7 @@ Material:
     - _Glossiness: 0
     - _GlossinessSource: 0
     - _GlossyReflections: 0
-    - _Metallic: 0
+    - _Metallic: 1
     - _Metallic_Max: 1
     - _Metallic_Min: 1
     - _Noise_Burn: 0.2
@@ -114,7 +114,7 @@ Material:
     - _Roughness_Max: 0.4
     - _Roughness_Min: 0.7
     - _Shininess: 0
-    - _Smoothness: 0
+    - _Smoothness: 0.6
     - _SmoothnessSource: 0
     - _SmoothnessTextureChannel: 0
     - _SpecSource: 0
@@ -125,8 +125,8 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 1}
-    - _Color: {r: 0.28301886, g: 0.28301886, b: 0.28301886, a: 1}
+    - _BaseColor: {r: 0.49056602, g: 0.49056602, b: 0.49056602, a: 1}
+    - _Color: {r: 0.49056596, g: 0.49056596, b: 0.49056596, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Layer_Influence: {r: 1, g: 0.25, b: 0.125, a: 0}
     - _Noise_Balance: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
