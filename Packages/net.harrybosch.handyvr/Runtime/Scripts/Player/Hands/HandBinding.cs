@@ -133,7 +133,7 @@ namespace HandyVR.Player.Hands
                 return 1.0f / (Mathf.Acos(Vector3.Dot(d1, d2)) * Mathf.Rad2Deg);
             }
 
-            return Utility.Best(VRBindable.All, getScore, 1.0f / detachedBindingAngle);
+            return Utility.Best(VRBindable.All, getScore, 1.0f / (detachedBindingAngle * 2.0f));
         }
 
         private bool CanSee(VRBindable other)
