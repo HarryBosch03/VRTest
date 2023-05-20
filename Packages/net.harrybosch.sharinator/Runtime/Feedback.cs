@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Sharinator
+namespace Sharinator.Runtime
 {
     public static class Feedback
     {

@@ -12,6 +12,7 @@ namespace HandyVR.Player.Hands
         [SerializeField] [Range(0.0f, 1.0f)] private float forceScaling = 1.0f;
 
         private PlayerHand hand;
+        private float lastBoundTime = 0.0f;
 
         public void Init(PlayerHand hand)
         {
@@ -37,12 +38,11 @@ namespace HandyVR.Player.Hands
             if (hand.ActiveBinding)
             {
                 rb.isKinematic = true;
-                hand.transform.position = newPosition;
-                hand.transform.rotation = newRotation;
+                lastBoundTime = Time.fixedTime;
                 return;
             }
 
-            CheckIgnoreLastBindingCollision();
+            CheckIgnoreLastBindingCollision();            
 
             rb.isKinematic = false;
             rb.centerOfMass = Vector3.zero;
@@ -64,48 +64,13 @@ namespace HandyVR.Player.Hands
             hand.Input.Rumble(rumbleMagnitude, 0.0f);
         }
 
-        /// <summary>
-        /// Checks if the last thing we held was colliding with this hand, but isn't this frame,
-        /// if so, stop ignoring its collision.
-        /// </summary>
         private void CheckIgnoreLastBindingCollision()
         {
-            // Skip if the hand is inactive, band aid fix for order of operations.
-            // if the hand is still inactive from holding the object, it will pass as,
-            // "not colling" and re-enable collision, causing the held object to loose,
-            // its thrown velocity by colliding with the hand on its way out.
-            if (!hand.handModel.gameObject.activeInHierarchy) return;
-
-            // Check we have a last bound object, and we are actually ignoring its collision.
-            if (!hand.ignoreLastBindingCollision) return;
+            if (Time.fixedTime < lastBoundTime + 0.2f) return;
             if (hand.ActiveBinding == null) return;
             if (!hand.ActiveBinding.bindable) return;
-
-            // Loop through all colliders in the held object and the hand. If one of them are
-            // intersecting, they are intersecting and we continue to ignore the collision.
-            var collided = false;
-            var listA = hand.Colliders;
-            var listB = hand.ActiveBinding.bindable.GetComponentsInChildren<Collider>();
-            foreach (var a in listA)
-            {
-                foreach (var b in listB)
-                {
-                    if (!Physics.ComputePenetration(a, a.transform.position, a.transform.rotation,
-                            b, b.transform.position, b.transform.rotation,
-                            out _, out _)) continue;
-
-                    collided = true;
-                    break;
-                }
-
-                if (collided) break;
-            }
-
-
-            if (collided) return;
-
-            hand.ignoreLastBindingCollision = false;
-            Utility.IgnoreCollision(hand.ActiveBinding.bindable.gameObject, hand.gameObject, false);
+            
+            Utility.Physics.IgnoreCollision(hand.ActiveBinding.bindable.gameObject, hand.gameObject, false);
         }
     }
 }

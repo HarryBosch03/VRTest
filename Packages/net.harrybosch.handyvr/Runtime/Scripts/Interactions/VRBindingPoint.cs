@@ -24,13 +24,6 @@ namespace HandyVR.Interactions
         private void FixedUpdate()
         {
             if (!activeBinding) CheckForNewBinding();
-            else UpdateBinding();
-        }
-
-        private void UpdateBinding()
-        {
-            activeBinding.Position = transform.position;
-            activeBinding.Rotation = transform.rotation;
         }
 
         private void CheckForNewBinding()
@@ -43,7 +36,7 @@ namespace HandyVR.Interactions
                 if (pickup.ActiveBinding) continue;
                 if (!Filter(pickup)) continue;
 
-                activeBinding = pickup.CreateBinding();
+                activeBinding = pickup.CreateBinding(() => transform.position, () => transform.rotation, () => false);
                 
                 break;
             }

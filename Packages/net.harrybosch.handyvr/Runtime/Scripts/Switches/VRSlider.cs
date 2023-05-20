@@ -1,62 +1,60 @@
+using System;
 using HandyVR.Interactions;
+using Interactions;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace HandyVR.Switches
 {
-    public sealed class VRSlider : VRBindable
+    public sealed class VRSlider : FloatDriver
     {
-        [SerializeField] private float sliderRange;
-        [SerializeField] private int stops;
-        [SerializeField] private float stopSmoothTime = 0.05f;
-        [SerializeField] [Range(0.0f, 1.0f)] private float softMovement = 0.1f;
+        [SerializeField] private float extents;
+        
+        private VRHandle handle;
+        private new Rigidbody rigidbody;
 
-        private Transform handle;
-        private Transform grabPoint;
+        public override float Value => handle.transform.localPosition.z / extents * 0.5f + 0.5f;
 
-        private float position;
-        private float tPosition;
-
-        private float stopVelocity;
-
-        public Vector3 HandPosition => grabPoint ? grabPoint.position : handle.position;
-        public Quaternion HandRotation => grabPoint ? grabPoint.rotation : handle.rotation;
-
-        protected override void Awake()
+        private void Awake()
         {
-            base.Awake();
-
-            handle = transform.GetChild(0);
-            grabPoint = handle.GetChild(0);
+            rigidbody = gameObject.GetOrAddComponent<Rigidbody>();
+            rigidbody.isKinematic = true;
+            rigidbody.useGravity = false;
+            
+            handle = GetComponentInChildren<VRHandle>();
+            SetupHandle();
         }
 
-        private void Update()
+        private void SetupHandle()
         {
-            if (stops > 1)
+            var rigidbody = handle.gameObject.GetOrAddComponent<Rigidbody>();
+            rigidbody.mass = 0.02f;
+            rigidbody.drag = 6.0f;
+            rigidbody.useGravity = false;
+            rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+            rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            
+            var joint = handle.gameObject.GetOrAddComponent<ConfigurableJoint>();
+            joint.connectedBody = this.rigidbody;
+            
+            joint.xMotion = ConfigurableJointMotion.Locked;
+            joint.yMotion = ConfigurableJointMotion.Locked;
+            joint.zMotion = ConfigurableJointMotion.Limited;
+            
+            joint.angularXMotion = ConfigurableJointMotion.Locked;
+            joint.angularYMotion = ConfigurableJointMotion.Locked;
+            joint.angularZMotion = ConfigurableJointMotion.Locked;
+
+            joint.autoConfigureConnectedAnchor = false;
+            joint.anchor = Vector3.zero;
+            joint.connectedAnchor = Vector3.zero;
+            
+            joint.linearLimit = new SoftJointLimit()
             {
-                position = Mathf.SmoothDamp(position, tPosition, ref stopVelocity, stopSmoothTime);
-            }
-
-            position = Mathf.Clamp(this.position, -sliderRange / 2.0f, sliderRange / 2.0f);
-            handle.position = transform.position + transform.forward * position;
-        }
-
-        public override void SetPosition(Vector3 position)
-        {
-            var dot = Vector3.Dot(transform.forward, position) - Vector3.Dot(transform.forward, transform.position);
-
-            if (stops > 1) ApplyStops(dot);
-            else this.position = dot;
-        }
-
-        public override void SetRotation(Quaternion rotation) { }
-
-        private void ApplyStops(float dot)
-        {
-            var p = dot / sliderRange + 0.5f;
-            p = Mathf.Floor(p * (stops - 1)) / (stops - 1);
-
-            var d = (p - 0.5f) * sliderRange;
-            tPosition = d + (dot - d) * softMovement;
+                limit = extents,
+                bounciness = 0.0f,
+                contactDistance = 0.0f,
+            };
         }
     }
 }

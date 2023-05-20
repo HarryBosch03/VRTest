@@ -15,10 +15,6 @@ namespace HandyVR.Interactions
         [SerializeField] private Quaternion flipROffset = Quaternion.identity;
 
         private readonly List<ColliderData> colliderData = new();
-        
-        private Vector3 tPosition;
-        private Quaternion tRotation;
-        private bool tFlipped;
 
         public event Action BindingActiveEvent;
         public event Action BindingDeactiveEvent;
@@ -44,11 +40,7 @@ namespace HandyVR.Interactions
         
         public VRBindingType BindingType => bindingType;
 
-        public override void SetPosition(Vector3 position) => tPosition = position;
-        public override void SetRotation(Quaternion rotation) => tRotation = rotation;
-        public override void SetFlipped(bool flipped) => tFlipped = flipped;
-
-        public override void OnBindingActivated()
+        public override void OnBindingActivated(VRBinding binding)
         {
             foreach (var data in colliderData)
             {
@@ -59,7 +51,7 @@ namespace HandyVR.Interactions
             BindingActiveEvent?.Invoke();
         }
 
-        public override void OnBindingDeactivated()
+        public override void OnBindingDeactivated(VRBinding binding)
         {
             foreach (var data in colliderData)
             {
@@ -95,14 +87,14 @@ namespace HandyVR.Interactions
         {
             if (!ActiveBinding) return;
 
-            var force = (tPosition + pOffset - Rigidbody.position) / Time.deltaTime - Rigidbody.velocity;
+            var force = (BindingPosition + pOffset - Rigidbody.position) / Time.deltaTime - Rigidbody.velocity;
             Rigidbody.AddForce(force, ForceMode.VelocityChange);
 
             var offset = rOffset.normalized;
-            if (flipWithHand && tFlipped) offset = flipROffset;
+            if (flipWithHand && BindingFlipped) offset = flipROffset;
             
             //var delta = Utility.Quaternion.Difference(rOffset.normalized * tRotation, Rigidbody.rotation);
-            var delta = tRotation * offset * Quaternion.Inverse(Rigidbody.rotation);
+            var delta = BindingRotation * offset * Quaternion.Inverse(Rigidbody.rotation);
             delta.ToAngleAxis(out var angle, out var axis);
             var torque = axis * (angle * Mathf.Deg2Rad / Time.deltaTime) - Rigidbody.angularVelocity;
             Rigidbody.AddTorque(torque, ForceMode.VelocityChange);

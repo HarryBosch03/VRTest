@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using HandyVR.Interactions;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
+using UnityEngine.XR.OpenXR.Features.Interactions;
 
 namespace HandyVR.Player.Hands
 {
@@ -9,14 +11,11 @@ namespace HandyVR.Player.Hands
     {
         [SerializeField] private float pickupRange = 0.2f;
         [SerializeField] private float detachedBindingAngle;
-        [SerializeField] private float detachedBindingForce = 15.0f;
-        
+        [SerializeField] private float detachedBindingForce = 400.0f;
+        [SerializeField] private float detachedBindingMinForce = 50.0f;
+
         private PlayerHand hand;
         private LineRenderer lines;
-
-        private float detachedBindingSpeed;
-
-        private Vector3 preBindingHandPosition;
 
         private static HashSet<VRBindable> existingDetachedBindings = new();
         public VRBinding ActiveBinding { get; private set; }
@@ -33,16 +32,17 @@ namespace HandyVR.Player.Hands
 
         public void Update()
         {
+            if (XRController.rightHand != null && ((OculusTouchControllerProfile.OculusTouchController)XRController.rightHand).secondaryButton.isPressed)
+            {
+                hand.Rigidbody.isKinematic = false;
+            }
+
             PointingAt = null;
             lines.enabled = false;
 
             hand.Input.Grip.ChangedThisFrame(OnGrip);
 
-            if (hand.ActiveBinding)
-            {
-                UpdateActiveBinding();
-                return;
-            }
+            if (hand.ActiveBinding) return;
 
             if (DetachedBinding)
             {
@@ -74,26 +74,25 @@ namespace HandyVR.Player.Hands
             }
 
             var rb = DetachedBinding.Rigidbody;
-            var dir = hand.PointRef.position - rb.position;
-            var distance = dir.magnitude;
-            dir /= distance;
+            var direction = hand.PointRef.position - rb.position;
+            var distance = direction.magnitude;
+            direction /= distance;
 
-            detachedBindingSpeed += detachedBindingForce * Time.deltaTime;
-
-            if (distance < detachedBindingSpeed * Time.deltaTime)
+            var delta = detachedBindingForce * Time.deltaTime / rb.mass;
+            if (distance < delta * Time.deltaTime)
             {
                 RemoveDetachedBinding(true);
                 return;
             }
-            
-            var force = dir * detachedBindingSpeed - rb.velocity;
+
+            var force = direction * (delta * (distance + detachedBindingMinForce / detachedBindingForce)) - rb.velocity;
             rb.AddForce(force, ForceMode.VelocityChange);
         }
 
         private void RemoveDetachedBinding(bool bind)
         {
             if (!DetachedBinding) return;
-            Utility.IgnoreCollision(DetachedBinding.gameObject, hand.gameObject, false);
+            Utility.Physics.IgnoreCollision(DetachedBinding.gameObject, hand.gameObject, false);
 
             if (bind) Bind(DetachedBinding);
 
@@ -101,25 +100,11 @@ namespace HandyVR.Player.Hands
             DetachedBinding = null;
         }
 
-        private void UpdateActiveBinding()
-        {
-            hand.ActiveBinding.Position = hand.Target.position;
-            hand.ActiveBinding.Rotation = hand.Target.rotation;
-            hand.ActiveBinding.Flipped = hand.Flipped;
-        }
-
         private void Bind(VRBindable pickup)
         {
-            if (!hand.ignoreLastBindingCollision)
-            {
-                Utility.IgnoreCollision(pickup.gameObject, hand.gameObject, true);
-                hand.ignoreLastBindingCollision = true;
-            }
+            Utility.Physics.IgnoreCollision(pickup.gameObject, hand.gameObject, true);
 
-            preBindingHandPosition = pickup.transform.InverseTransformPoint(hand.Rigidbody.position);
-            ActiveBinding = pickup.CreateBinding();
-            UpdateActiveBinding();
-            
+            ActiveBinding = pickup.CreateBinding(() => hand.Target.position, () => hand.Target.rotation, () => hand.Flipped);
         }
 
         private VRBindable GetPointingAt()
@@ -127,19 +112,19 @@ namespace HandyVR.Player.Hands
             float getScore(VRBindable bindable)
             {
                 if (!CanSee(bindable)) return -1.0f;
-                
+
                 var d1 = (bindable.transform.position - hand.PointRef.position).normalized;
                 var d2 = hand.PointRef.forward;
                 return 1.0f / (Mathf.Acos(Vector3.Dot(d1, d2)) * Mathf.Rad2Deg);
             }
 
-            return Utility.Best(VRBindable.All, getScore, 1.0f / (detachedBindingAngle * 2.0f));
+            return Utility.Collections.Best(VRBindable.All, getScore, 1.0f / (detachedBindingAngle * 2.0f));
         }
 
         private bool CanSee(VRBindable other)
         {
             var ray = new Ray(hand.PointRef.position, other.transform.position - hand.PointRef.position);
-            return Physics.Raycast(ray, out var hit) && hit.transform.IsChildOf(other.transform);
+            return Physics.Raycast(ray, out var hit) && other.transform.IsChildOf(hit.transform);
         }
 
         private void OnGrip(bool state)
@@ -153,9 +138,14 @@ namespace HandyVR.Player.Hands
         private void DeactivateBinding()
         {
             if (!ActiveBinding) return;
-            
+
             ActiveBinding.Deactivate();
-            hand.Rigidbody.position = ActiveBinding.bindable.transform.TransformPoint(preBindingHandPosition);
+
+            hand.handModel.gameObject.SetActive(true);
+
+            hand.Rigidbody.isKinematic = false;
+            hand.Rigidbody.velocity = Vector3.zero;
+            hand.Rigidbody.angularVelocity = Vector3.zero;
         }
 
         private void OnGripPressed()
@@ -179,10 +169,9 @@ namespace HandyVR.Player.Hands
             if (existingDetachedBindings.Contains(pointingAt)) return;
 
             DetachedBinding = pointingAt;
-            detachedBindingSpeed = 0.0f;
             existingDetachedBindings.Add(DetachedBinding);
 
-            Utility.IgnoreCollision(DetachedBinding.gameObject, hand.gameObject, true);
+            Utility.Physics.IgnoreCollision(DetachedBinding.gameObject, hand.gameObject, true);
         }
     }
 }

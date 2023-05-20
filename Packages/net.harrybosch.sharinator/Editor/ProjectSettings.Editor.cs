@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Sharinator.Runtime;
 using UnityEditor;
 using UnityEngine;
 using UEditor = UnityEditor.Editor;
@@ -15,7 +16,7 @@ namespace Sharinator.Editor
         {
             return new SettingsProvider("Project/Sharinator", SettingsScope.Project)
             {
-                guiHandler = ctx =>
+                guiHandler = _ =>
                 {
                     if (ProjectSettings.Settings == null)
                     {

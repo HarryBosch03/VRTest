@@ -25,12 +25,11 @@ namespace HandyVR.Player
 
         [HideInInspector] public Transform handModel;
 
-        [HideInInspector] public bool ignoreLastBindingCollision;
-
         private Transform pointRef;
 
         public HandInput Input { get; private set; }
         public HandBinding BindingController => binding;
+        public HandMovement Movement => movement;
 
         public VRBinding ActiveBinding => binding.ActiveBinding;
         public Rigidbody Rigidbody { get; private set; }

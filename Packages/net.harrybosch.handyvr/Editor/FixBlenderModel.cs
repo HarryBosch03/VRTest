@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace HandyVREditor
+namespace HandyVREditor.Editor
 {
     public sealed class FixBlenderModel : AssetPostprocessor
     {

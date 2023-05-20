@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HandyVR.Interactions.Pickups;
 using HandyVR.Player;
 using HandyVR.Player.Input;
@@ -8,7 +9,17 @@ namespace HandyVR.Interactions
 {
     public abstract class VRBindable : MonoBehaviour
     {
-        public Rigidbody Rigidbody { get; private set; }
+        // ReSharper disable once InconsistentNaming
+        private Rigidbody rigidbody_DoNotUse;
+
+        public Rigidbody Rigidbody
+        {
+            get
+            {
+                if (!rigidbody_DoNotUse) rigidbody_DoNotUse = GetRigidbody();
+                return rigidbody_DoNotUse;
+            }
+        }
         public VRBinding ActiveBinding { get; private set; }
 
         public Transform Handle { get; set; }
@@ -16,13 +27,14 @@ namespace HandyVR.Interactions
         public static readonly List<VRBindable> All = new();
 
         public virtual Rigidbody GetRigidbody() => GetComponent<Rigidbody>();
-        
+
+        public Vector3 BindingPosition => ActiveBinding.position();
+        public Quaternion BindingRotation => ActiveBinding.rotation();
+        public bool BindingFlipped => ActiveBinding.flipped();
+
         protected virtual void Awake()
         {
-            Rigidbody = GetRigidbody();
-
-            Handle = transform.DeepFind("Handle");
-            if (!Handle) Handle = transform;
+            Handle = transform;
         }
 
         protected virtual void OnEnable()
@@ -35,17 +47,13 @@ namespace HandyVR.Interactions
             All.Remove(this);
         }
 
-        public virtual void SetPosition(Vector3 position) => transform.position = position;
-        public virtual void SetRotation(Quaternion rotation) => transform.rotation = rotation;
-        public virtual void SetFlipped(bool flipped) { }
-
-        public VRBinding CreateBinding()
+        public VRBinding CreateBinding(Func<Vector3> position, Func<Quaternion> rotation, Func<bool> flipped)
         {
-            return ActiveBinding = new VRBinding(this);
+            return ActiveBinding = new VRBinding(this, position, rotation, flipped);
         }
 
-        public virtual void OnBindingActivated() { }
-        public virtual void OnBindingDeactivated() { }
+        public virtual void OnBindingActivated(VRBinding binding) { }
+        public virtual void OnBindingDeactivated(VRBinding binding) { }
 
         public static VRBindable GetPickup(Vector3 from, float range)
         {

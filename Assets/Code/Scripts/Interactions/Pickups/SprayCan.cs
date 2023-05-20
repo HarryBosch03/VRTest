@@ -58,7 +58,7 @@ namespace Interactions.Pickups
             var hits = Physics.RaycastAll(ray, sprayDistance);
             if (hits.Length == 0) return;
 
-            if (!HandyVR.Utility.Best(hits, out var hit, ScoringMethod, 0.0f)) return;
+            if (!HandyVR.Utility.Collections.Best(hits, out var hit, ScoringMethod, 0.0f)) return;
 
             var emitParams = new ParticleSystem.EmitParams();
             emitParams.position = hit.point;

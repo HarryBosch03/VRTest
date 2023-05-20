@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace HandyVR.Interactions
@@ -11,25 +10,20 @@ namespace HandyVR.Interactions
         [SerializeField] private float grabDamper = 25.0f;
 
         private bool wasBound;
-        private Vector3 grabTarget;
-
-        public Vector3 HandPosition => Handle.position;
-        public Quaternion HandRotation => Handle.rotation;
-
+        private Vector3 offset;
+        
         public override Rigidbody GetRigidbody() => GetComponentInParent<Rigidbody>();
 
-        public override void SetPosition(Vector3 position)
+        public override void OnBindingActivated(VRBinding binding)
         {
-            grabTarget = position;
+            offset = Handle.position - binding.position();
         }
-        
-        public override void SetRotation(Quaternion rotation) { }
 
         private void FixedUpdate()
         {
             if (!ActiveBinding) return;
 
-            var diff = (grabTarget - Handle.position);
+            var diff = (BindingPosition + offset - Handle.position);
             var pointVelocity = Rigidbody.GetPointVelocity(Handle.position);
             var force = diff * grabSpring - pointVelocity * grabDamper;
             

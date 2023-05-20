@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace HandyVR.Interactions
 {
@@ -8,41 +9,32 @@ namespace HandyVR.Interactions
         public bool active;
 
         private Vector3 lastPosition;
-        
         private Vector3 lastValue;
 
-        public Vector3 Position
-        {
-            get => bindable.Rigidbody ? bindable.Rigidbody.position : bindable.transform.position;
-            set => bindable.SetPosition(value);
-        }
-
-        public Quaternion Rotation
-        {
-            set => bindable.SetRotation(value);
-        }
-
-        public bool Flipped
-        {
-            set => bindable.SetFlipped(value);
-        }
-
-        public VRBinding(VRBindable bindable)
+        public readonly Func<Vector3> position;
+        public readonly Func<Quaternion> rotation;
+        public readonly Func<bool> flipped;
+        
+        public VRBinding(VRBindable bindable, Func<Vector3> position, Func<Quaternion> rotation, Func<bool> flipped)
         {
             if (bindable.ActiveBinding) bindable.ActiveBinding.Deactivate();
 
+            this.position = position;
+            this.rotation = rotation;
+            this.flipped = flipped;
+            
             this.bindable = bindable;
             active = true;
 
-            bindable.OnBindingActivated();
+            bindable.OnBindingActivated(this);
         }
 
         public void Deactivate()
         {
+            bindable.OnBindingDeactivated(this);
+            
             if (!active) return;
             active = false;
-
-            bindable.OnBindingDeactivated();
         }
 
         public bool Valid()

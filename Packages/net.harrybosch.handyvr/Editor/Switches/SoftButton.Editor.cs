@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace HandyVREditor.Switches
+namespace HandyVREditor.Editor.Switches
 {
     [InitializeOnLoad]
     public static class SoftButtonWarning
