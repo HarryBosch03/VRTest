@@ -1,6 +1,6 @@
 namespace HandyVR.Utility
 {
-    public class Transform
+    public static class Transform
     {
         public static UnityEngine.Quaternion Difference(UnityEngine.Quaternion a, UnityEngine.Quaternion b)
         {

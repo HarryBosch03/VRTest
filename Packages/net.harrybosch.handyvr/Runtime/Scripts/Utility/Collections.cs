@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HandyVR.Utility
 {
-    public class Collections
+    public static class Collections
     {
         public static bool Best<T>(IEnumerable<T> list, out T best, Func<T, float> getScore, float startingScore = 0.0f)
         {

@@ -3,7 +3,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Sharinator.Runtime
+namespace Sharinator
 {
     public sealed class ProjectSettings : ScriptableObject
     {

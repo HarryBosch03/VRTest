@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Sharinator.Runtime
+namespace Sharinator
 {
     public static class Screenshot
     {

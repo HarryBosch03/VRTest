@@ -4,4 +4,5 @@
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=blacklight/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Chirality/@EntryIndexedValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=Deadzone/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Deadzone/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Toolbarinator/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

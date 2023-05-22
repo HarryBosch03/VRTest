@@ -1,8 +1,5 @@
-using System;
 using HandyVR.Interactions;
-using Interactions;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace HandyVR.Switches
 {

@@ -180,6 +180,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "net.harrybosch.toolbarinator": {
+      "version": "file:net.harrybosch.toolbarinator",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,

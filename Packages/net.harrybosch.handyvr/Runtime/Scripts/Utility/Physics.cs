@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace HandyVR.Utility
 {
-    public class Physics
+    public static class Physics
     {
         public static void IgnoreCollision(GameObject a, GameObject b, bool ignore)
         {
