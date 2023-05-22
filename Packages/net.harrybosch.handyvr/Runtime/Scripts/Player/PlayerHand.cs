@@ -29,7 +29,9 @@ namespace HandyVR.Player
 
         private Transform pointRef;
 
-        public HandInput Input { get; private set; }
+        private HandInput input;
+
+        public HandInput Input => input;
         public HandBinding BindingController => binding;
         public HandMovement Movement => movement;
         public Transform HandModel { get; private set; }
@@ -56,7 +58,7 @@ namespace HandyVR.Player
             };
 
             // Create input module with correct controller.
-            Input = new HandInput(controller);
+            input = new HandInput(controller);
             
             Rigidbody = gameObject.GetOrAddComponent<Rigidbody>();
             Colliders = GetComponentsInChildren<Collider>();

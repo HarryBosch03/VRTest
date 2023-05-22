@@ -14,7 +14,6 @@ namespace HandyVR.Utility
             if (!group)
             {
                 group = new GameObject("HandyVR");
-                group.hideFlags = HideFlags.DontSave;
             }
             
             transform.SetParent(group.transform);

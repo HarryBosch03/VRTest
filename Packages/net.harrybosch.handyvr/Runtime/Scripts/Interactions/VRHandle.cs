@@ -15,9 +15,12 @@ namespace HandyVR.Interactions
         [SerializeField] private float grabSpring = 500.0f;
         [Tooltip("Damping Constant used to match the handle velocity")]
         [SerializeField] private float grabDamper = 25.0f;
+        [Tooltip("Scaling to apply to force when converting it to torque")]
+        [SerializeField] private float grabAngle = 10.0f;
 
         private bool wasBound;
-        private Vector3 offset;
+        private Vector3 translationOffset;
+        private Quaternion rotationOffset;
         
         // Look for Rigidbody in parents as well.
         public override Rigidbody GetRigidbody() => GetComponentInParent<Rigidbody>();
@@ -26,7 +29,8 @@ namespace HandyVR.Interactions
         {
             // Calculate the offset when we grab the handle, this stops the handle
             // rocketing towards the hands actual position.
-            offset = Handle.position - binding.position();
+            translationOffset = Handle.position - binding.position();
+            rotationOffset = Handle.rotation * Quaternion.Inverse(binding.rotation());
         }
 
         private void FixedUpdate()
@@ -34,11 +38,18 @@ namespace HandyVR.Interactions
             if (!ActiveBinding) return;
 
             // Match the hands position through a simple spring damper, applied to the handles parent at the handles position.
-            var diff = (BindingPosition + offset - Handle.position);
+            var diff = (BindingPosition + translationOffset - Handle.position);
             var pointVelocity = Rigidbody.GetPointVelocity(Handle.position);
             var force = diff * grabSpring - pointVelocity * grabDamper;
             
             Rigidbody.AddForceAtPosition(force, Handle.position, ForceMode.Acceleration);
+            
+            var delta = BindingRotation * rotationOffset * Quaternion.Inverse(Rigidbody.rotation);
+            delta.ToAngleAxis(out var angle, out var axis);
+            
+            // Calculate a torque to move the rigidbody to the target rotation with zero angular velocity.
+            var torque = axis * (angle * Mathf.Deg2Rad * grabSpring) - Rigidbody.angularVelocity * grabDamper;
+            Rigidbody.AddTorque(torque * grabAngle, ForceMode.Acceleration);
         }
     }
 }

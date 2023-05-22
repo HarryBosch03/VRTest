@@ -1,10 +1,9 @@
 using HandyVR.Interactions;
 using UnityEditor;
-using UnityEngine;
 using static UnityEditor.EditorGUILayout;
 using static UnityEngine.GUILayout;
 
-namespace HandyVREditor.Interactions
+namespace HandyVREditor.Editor.Interactions
 {
     [CustomEditor(typeof(VRPickup))]
     public class VRPickupEditor : Editor
