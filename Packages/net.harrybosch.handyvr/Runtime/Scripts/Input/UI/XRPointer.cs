@@ -7,17 +7,22 @@ using UnityEngine.InputSystem.UI;
 
 namespace HandyVR.Input.UI
 {
+    /// <summary>
+    /// A Component to be added to the VR Hand which allows it to interact with canvases.
+    /// </summary>
     [RequireComponent(typeof(PlayerHand))]
+    [AddComponentMenu("HandyVR/Hands/XRPointer", Reference.AddComponentMenuOrder.Submenu)]
     public class XRPointer : MonoBehaviour
     {
+        [Tooltip("An in world object that will appear on the UI where the hand is pointing")]
         [SerializeField] private GameObject cursor;
+        [Tooltip("The additive scroll speed of the thumbstick.")]
         [SerializeField] private float scrollSpeed = 1000.0f;
         
         private ExtendedPointerEventData pointerData;
         private PlayerHand hand;
 
         public HandInput.InputWrapper TriggerAction => hand.Input.Trigger;
-        public HandInput.InputWrapper GripAction => hand.Input.Grip;
         public HandInput.InputWrapper ThumbstickXAction => hand.Input.ThumbstickX;
         public HandInput.InputWrapper ThumbstickYAction => hand.Input.ThumbstickY;
         public Transform PointRef => hand.PointRef;
@@ -25,6 +30,8 @@ namespace HandyVR.Input.UI
 
         private void Awake()
         {
+            // Get pointer data linked to the event system.
+            // ExtendedPointerEventData gives us control over tracked device position and rotation.
             pointerData = new ExtendedPointerEventData(EventSystem.current);
             hand = GetComponent<PlayerHand>();
         }
@@ -44,6 +51,9 @@ namespace HandyVR.Input.UI
             UpdateCursor();
         }
 
+        /// <summary>
+        /// Move cursor object to where the VR hand is pointing at, disable it if nothing is being pointed at.
+        /// </summary>
         private void UpdateCursor()
         {
             if (!cursor) return;
@@ -58,6 +68,10 @@ namespace HandyVR.Input.UI
             cursor.transform.rotation = Quaternion.identity;
         }
 
+        /// <summary>
+        /// Builds the data for the event system involving tracked devices, the rest is handled by the event system.
+        /// </summary>
+        /// <returns></returns>
         public ExtendedPointerEventData GetData()
         {
             pointerData.trackedDevicePosition = PointRef.position;

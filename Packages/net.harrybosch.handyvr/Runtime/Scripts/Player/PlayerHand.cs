@@ -8,28 +8,31 @@ using UnityEngine.InputSystem.XR;
 namespace HandyVR.Player
 {
     /// <summary>
-    /// Behaviour that controls the hands, should be placed on a child
-    /// of an Tracked Pose Driver.
+    /// Main controller for the Players Hands.
     /// </summary>
     [SelectionBase]
     [DisallowMultipleComponent]
+    [AddComponentMenu("HandyVR/Hand", Reference.AddComponentMenuOrder.Components)]
     public sealed class PlayerHand : MonoBehaviour
     {
-        [Space] [SerializeField] private Chirality chirality;
+        [Space]
+        [SerializeField] private Chirality chirality;
+        [Tooltip("Chirality of the hand model used.")]
         [SerializeField] private Chirality defaultHandModelChirality;
+        [Tooltip("Axis to flip the hand model on if there is a chiral mismatch")]
         [SerializeField] private Vector3 flipAxis = Vector3.right;
 
-        [Space] [SerializeField] private HandMovement movement;
+        [Space] 
+        [SerializeField] private HandMovement movement;
         [SerializeField] private HandBinding binding;
         [SerializeField] private HandAnimator animator;
-
-        [HideInInspector] public Transform handModel;
 
         private Transform pointRef;
 
         public HandInput Input { get; private set; }
         public HandBinding BindingController => binding;
         public HandMovement Movement => movement;
+        public Transform HandModel { get; private set; }
 
         public VRBinding ActiveBinding => binding.ActiveBinding;
         public Rigidbody Rigidbody { get; private set; }
@@ -41,9 +44,10 @@ namespace HandyVR.Player
         private void Awake()
         {
             // Clear Parent to stop the transform hierarchy from fucking up physics.
+            // Group objects to keep hierarchy neat.
             Target = transform.parent;
             Utility.Scene.BreakHierarchyAndGroup(transform);
-
+            
             Func<XRController> controller = chirality switch
             {
                 Chirality.Left => () => XRController.leftHand,
@@ -51,56 +55,70 @@ namespace HandyVR.Player
                 _ => throw new ArgumentOutOfRangeException()
             };
 
+            // Create input module with correct controller.
             Input = new HandInput(controller);
-
+            
             Rigidbody = gameObject.GetOrAddComponent<Rigidbody>();
             Colliders = GetComponentsInChildren<Collider>();
 
+            // Initialize Submodules.
             movement.Init(this);
             binding.Init(this);
             animator.Init(this);
 
+            // Cache Hierarchy.
             pointRef = transform.DeepFind("Point Ref");
-
-            handModel = transform.DeepFind("Model");
+            HandModel = transform.DeepFind("Model");
+            
+            // Flip hand if chiral mismatch.
             if (Flipped)
             {
                 var scale = Vector3.Reflect(Vector3.one, flipAxis.normalized);
-                handModel.localScale = scale;
+                HandModel.localScale = scale;
             }
         }
 
         private void FixedUpdate()
         {
+            // Update Submodules.
             movement.MoveTo(Target.position, Target.rotation);
             binding.FixedUpdate();
         }
 
         private void Update()
         {
+            // Update Submodules.
             Input.Update();
+            
+            // Update Targets Pose.
             Target.position = Input.Position;
             Target.rotation = Input.Rotation;
             
             if (ActiveBinding)
             {
-                handModel.gameObject.SetActive(false);
+                // Hide hand model if we are bound to something
+                HandModel.gameObject.SetActive(false);
+                
+                // Pass inputs to bound object.
                 ActiveBinding.bindable.Trigger(this, Input.Trigger);
             }
             else
             {
-                handModel.gameObject.SetActive(true);
+                // Show hand and animate if unbound.
+                HandModel.gameObject.SetActive(true);
                 animator.Update();
             }
         }
 
         private void LateUpdate()
         {
+            // Update Submodules.
             binding.Update();
         }
 
         private void OnCollisionEnter(Collision collision)
         {
+            // Callback for movement collision.
             movement.OnCollision(collision);
         }
 

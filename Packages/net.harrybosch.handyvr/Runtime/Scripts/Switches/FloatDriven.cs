@@ -2,9 +2,12 @@ using UnityEngine;
 
 namespace HandyVR.Switches
 {
+    /// <summary>
+    /// Base class for objects that can be driven by a float driver.
+    /// </summary>
     [SelectionBase]
     [DisallowMultipleComponent]
-    public class FloatDriven : MonoBehaviour
+    public abstract class FloatDriven : MonoBehaviour
     {
         [SerializeField] private FloatDriver driver;
         [SerializeField] private float defaultValue;

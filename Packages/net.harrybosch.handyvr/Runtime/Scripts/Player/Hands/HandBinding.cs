@@ -1,17 +1,22 @@
 using System.Collections.Generic;
 using HandyVR.Interactions;
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
-using UnityEngine.XR.OpenXR.Features.Interactions;
 
 namespace HandyVR.Player.Hands
 {
+    /// <summary>
+    /// Submodule used for managing the <see cref="PlayerHand"/>s current binding.
+    /// </summary>
     [System.Serializable]
     public class HandBinding
     {
+        [Tooltip("The radius to search for a pickup when the grab button is pressed")]
         [SerializeField] private float pickupRange = 0.2f;
+        [Tooltip("The angle of the cone used to find Pickups to create a Detached Binding")]
         [SerializeField] private float detachedBindingAngle;
+        [Tooltip("The magnitude of the force applied to a Detached Binding")]
         [SerializeField] private float detachedBindingForce = 400.0f;
+        [Tooltip("The Minimum force applied to the Detached Binding")]
         [SerializeField] private float detachedBindingMinForce = 50.0f;
 
         private PlayerHand hand;
@@ -32,22 +37,21 @@ namespace HandyVR.Player.Hands
 
         public void Update()
         {
-            if (XRController.rightHand != null && ((OculusTouchControllerProfile.OculusTouchController)XRController.rightHand).secondaryButton.isPressed)
-            {
-                hand.Rigidbody.isKinematic = false;
-            }
-
             PointingAt = null;
             lines.enabled = false;
 
+            // Call OnGrip if the Grip Input changed this frame.
             hand.Input.Grip.ChangedThisFrame(OnGrip);
-
+            
+            // Bail if binding is invalid.
             if (hand.ActiveBinding) return;
-
+            
+            // Update lines to match Detached Binding if we have one.
             if (DetachedBinding)
             {
                 lines.SetLine(hand.PointRef.position, DetachedBinding.Rigidbody.position);
             }
+            // Draw a line to the object were pointing at if there is one.
             else
             {
                 PointingAt = GetPointingAt();
@@ -67,17 +71,21 @@ namespace HandyVR.Player.Hands
         {
             if (!DetachedBinding) return;
 
+            // If we have an active binding, we cannot also have a detached binding, remove and bail.
             if (DetachedBinding.ActiveBinding)
             {
                 RemoveDetachedBinding(false);
                 return;
             }
-
+            
+            // Calculate force to move the detached binding towards the hand.
             var rb = DetachedBinding.Rigidbody;
             var direction = hand.PointRef.position - rb.position;
             var distance = direction.magnitude;
             direction /= distance;
 
+            // If the object has the speed to get to the players hand this frame, remove the detached binding
+            // and create an actual active binding, then bail.
             var delta = detachedBindingForce * Time.deltaTime / rb.mass;
             if (distance < delta * Time.deltaTime)
             {
@@ -85,63 +93,93 @@ namespace HandyVR.Player.Hands
                 return;
             }
 
+            // Apply the force
             var force = direction * (delta * (distance + detachedBindingMinForce / detachedBindingForce)) - rb.velocity;
             rb.AddForce(force, ForceMode.VelocityChange);
         }
 
+        /// <summary>
+        /// Removes the current Detached Binding
+        /// </summary>
+        /// <param name="bind">Should the detached binding be changed into a active binding?</param>
         private void RemoveDetachedBinding(bool bind)
         {
             if (!DetachedBinding) return;
+            
+            // Stop Ignoring collision
             Utility.Physics.IgnoreCollision(DetachedBinding.gameObject, hand.gameObject, false);
 
+            // Create actual binding.
             if (bind) Bind(DetachedBinding);
-
+            
             existingDetachedBindings.Remove(DetachedBinding);
             DetachedBinding = null;
         }
 
-        private void Bind(VRBindable pickup)
+        /// <summary>
+        /// Creates binding between and and Pickup
+        /// </summary>
+        /// <param name="bindable">The Pickup to bind</param>
+        private void Bind(VRBindable bindable)
         {
-            Utility.Physics.IgnoreCollision(pickup.gameObject, hand.gameObject, true);
+            // Ignore collision between hand and bindable.
+            Utility.Physics.IgnoreCollision(bindable.gameObject, hand.gameObject, true);
 
-            ActiveBinding = pickup.CreateBinding(() => hand.Target.position, () => hand.Target.rotation, () => hand.Flipped);
+            // Create binding.
+            ActiveBinding = bindable.CreateBinding(() => hand.Target.position, () => hand.Target.rotation, () => hand.Flipped);
         }
 
+        /// <summary>
+        /// Returns a Bindable that is being pointed at the most, while also being in line of sight.
+        /// </summary>
+        /// <returns>The Object being pointed at the most. Will return null if nothing can be found.</returns>
         private VRBindable GetPointingAt()
         {
+            // Method used to find the bindable being pointed at the most.
             float getScore(VRBindable bindable)
             {
+                // Do not use object we cannot see.
                 if (!CanSee(bindable)) return -1.0f;
 
                 var d1 = (bindable.transform.position - hand.PointRef.position).normalized;
                 var d2 = hand.PointRef.forward;
+                
+                // Reciprocate the result to find the object with the smallest dot product.
                 return 1.0f / (Mathf.Acos(Vector3.Dot(d1, d2)) * Mathf.Rad2Deg);
             }
-
+            
             return Utility.Collections.Best(VRBindable.All, getScore, 1.0f / (detachedBindingAngle * 2.0f));
         }
 
+        /// <summary>
+        /// Is there a clear line of sight from the Index Finger to the Bindable.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns>Is there a clear line of sight from the Index Finger to the Bindable.</returns>
         private bool CanSee(VRBindable other)
         {
             var ray = new Ray(hand.PointRef.position, other.transform.position - hand.PointRef.position);
             return Physics.Raycast(ray, out var hit) && other.transform.IsChildOf(hit.transform);
         }
-
+        
         private void OnGrip(bool state)
-        {
+        {   
             DeactivateBinding();
             RemoveDetachedBinding(false);
-
+            
             if (state) OnGripPressed();
         }
 
         private void DeactivateBinding()
         {
+            // Ignore if no active binding.
             if (!ActiveBinding) return;
 
+            // Deactivate the current binding.
             ActiveBinding.Deactivate();
 
-            hand.handModel.gameObject.SetActive(true);
+            // Preemptively reset the state of the hand model and rigidbody.
+            hand.HandModel.gameObject.SetActive(true);
 
             hand.Rigidbody.isKinematic = false;
             hand.Rigidbody.velocity = Vector3.zero;
@@ -150,6 +188,9 @@ namespace HandyVR.Player.Hands
 
         private void OnGripPressed()
         {
+            // Try to pickup the closest object to the hand.
+            // If none can be found, try to create a detached binding with
+            // whatever is being pointed at.
             var pickup = VRBindable.GetPickup(hand.transform.position, pickupRange);
             if (!pickup)
             {
@@ -168,9 +209,12 @@ namespace HandyVR.Player.Hands
             if (pointingAt.ActiveBinding) return;
             if (existingDetachedBindings.Contains(pointingAt)) return;
 
+            // Create detached binding.
             DetachedBinding = pointingAt;
+            // Add to ignore list to stop multiple object having detached bindings.
             existingDetachedBindings.Add(DetachedBinding);
 
+            // Ignore collision between the hand and the new detached binding.
             Utility.Physics.IgnoreCollision(DetachedBinding.gameObject, hand.gameObject, true);
         }
     }

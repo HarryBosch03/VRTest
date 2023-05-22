@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 namespace HandyVR.UI
 {
+    // TODO Finish
     [SelectionBase]
     [DisallowMultipleComponent]
     public sealed class XRMenu : MonoBehaviour
@@ -126,9 +127,8 @@ namespace HandyVR.UI
 
             canvas.worldCamera = Camera.main;
 
-            var scaler = canvas.gameObject.AddComponent<CanvasScaler>();
-
-            var raycaster = canvas.gameObject.AddComponent<TrackedDeviceRaycaster>();
+            canvas.gameObject.AddComponent<CanvasScaler>();
+            canvas.gameObject.AddComponent<TrackedDeviceRaycaster>();
         }
     }
 }

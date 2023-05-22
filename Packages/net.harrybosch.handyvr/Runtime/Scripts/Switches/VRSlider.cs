@@ -3,17 +3,21 @@ using UnityEngine;
 
 namespace HandyVR.Switches
 {
+    [AddComponentMenu("HandyVR/Float Drivers/Slider", Reference.AddComponentMenuOrder.Submenu)]
     public sealed class VRSlider : FloatDriver
     {
+        [Tooltip("The distance the handle can travel along the Y axis from the center.")]
         [SerializeField] private float extents;
         
         private VRHandle handle;
         private new Rigidbody rigidbody;
 
+        // Remap the local position of the handle so its offset along the Y axis represents a value between 0 and 1.
         public override float Value => handle.transform.localPosition.z / extents * 0.5f + 0.5f;
 
         private void Awake()
         {
+            // Autocomplete object if partially setup.
             rigidbody = gameObject.GetOrAddComponent<Rigidbody>();
             rigidbody.isKinematic = true;
             rigidbody.useGravity = false;

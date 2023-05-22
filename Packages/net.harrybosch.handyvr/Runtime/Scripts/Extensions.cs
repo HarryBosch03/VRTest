@@ -3,6 +3,9 @@ using UnityEngine.InputSystem;
 
 namespace HandyVR
 {
+    /// <summary>
+    /// Extension methods used in HandyVR.
+    /// </summary>
     public static class Extensions
     {
         public static class NameComparisons

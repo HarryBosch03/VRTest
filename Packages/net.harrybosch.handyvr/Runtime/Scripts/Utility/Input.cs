@@ -3,6 +3,9 @@ using UnityEngine.InputSystem;
 
 namespace HandyVR.Utility
 {
+    /// <summary>
+    /// Utility for Unity's Input System
+    /// </summary>
     public static class Input
     {
         public static void Bind(InputAction action, Action callback)

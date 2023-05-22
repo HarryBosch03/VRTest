@@ -7513,10 +7513,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bindingType: {fileID: 0}
-  pOffset: {x: 0, y: 0, z: 0}
-  rOffset: {x: 0, y: 0, z: 0, w: 1}
+  boundTranslation: {x: 0, y: 0, z: 0}
+  boundRotation: {x: 0, y: 0, z: 0, w: 1}
   flipWithHand: 0
-  flipROffset: {x: 0, y: 0, z: 0, w: 1}
+  additionalFlipRotation: {x: 0, y: 0, z: 0, w: 1}
 --- !u!64 &1126140920
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -13063,10 +13063,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bindingType: {fileID: 0}
-  pOffset: {x: 0, y: 0, z: 0}
-  rOffset: {x: -0.49999997, y: -0.49999997, z: -0.49999997, w: 0.49999997}
+  boundTranslation: {x: 0, y: 0, z: 0}
+  boundRotation: {x: -0.49999997, y: -0.49999997, z: -0.49999997, w: 0.49999997}
   flipWithHand: 1
-  flipROffset: {x: 0.49999997, y: -0.49999997, z: -0.49999997, w: -0.49999997}
+  additionalFlipRotation: {x: 0.49999997, y: -0.49999997, z: -0.49999997, w: -0.49999997}
 --- !u!64 &1470872937
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -14852,10 +14852,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bindingType: {fileID: 0}
-  pOffset: {x: 0, y: 0, z: 0}
-  rOffset: {x: 0, y: 0, z: 0, w: 1}
+  boundTranslation: {x: 0, y: 0, z: 0}
+  boundRotation: {x: 0, y: 0, z: 0, w: 1}
   flipWithHand: 0
-  flipROffset: {x: 0, y: 0, z: 0, w: 1}
+  additionalFlipRotation: {x: 0, y: 0, z: 0, w: 1}
 --- !u!64 &1954103487
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -14977,10 +14977,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bindingType: {fileID: 0}
-  pOffset: {x: 0, y: 0, z: 0}
-  rOffset: {x: 0, y: 0, z: 0, w: 0}
+  boundTranslation: {x: 0, y: 0, z: 0}
+  boundRotation: {x: 0, y: 0, z: 0, w: 0}
   flipWithHand: 0
-  flipROffset: {x: 0, y: 0, z: 0, w: 1}
+  additionalFlipRotation: {x: 0, y: 0, z: 0, w: 1}
 --- !u!64 &1961456083
 MeshCollider:
   m_ObjectHideFlags: 0

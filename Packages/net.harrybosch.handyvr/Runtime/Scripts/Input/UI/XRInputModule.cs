@@ -6,9 +6,15 @@ using UnityEngine.InputSystem.UI;
 
 namespace HandyVR.Input.UI
 {
+    /// <summary>
+    /// Custom input module added to the event system object, allows VR hands to work with UI.
+    /// </summary>
+    [AddComponentMenu("HandyVR/XRInputModule", Reference.AddComponentMenuOrder.Components)]
     public class XRInputModule : BaseInputModule
     {
+        // Speed used for """double""" clicks
         private const float ClickSpeed = 0.3f;
+        // Threshold for the *screen position* to move before dragging is called.
         private const float TrackedDeviceDragThresholdMultiplier = 1.4f;
         
         public override void Process()
@@ -17,27 +23,36 @@ namespace HandyVR.Input.UI
             
             foreach (var pointer in pointers)
             {
+                // Gets tracked device information from current pointer.
                 var data = pointer.GetData();
 
+                // cache and clear position as to not cloud the raycast results.
                 var savedPosition = data.position;
                 data.position = new Vector2(float.MaxValue, float.MaxValue);
                 
+                // Raycast with the event system.
                 var res = new List<RaycastResult>();
                 eventSystem.RaycastAll(data, res);
+                
+                // Restore the screen position and set the raycast.
                 data.position = savedPosition;
                 data.pointerCurrentRaycast = FindFirstRaycast(res);
-
+ 
                 var cam = Camera.main;
                 if (!cam) return;
+                
+                // Cast the raycast result into a screen position for use by the base event system.
                 var screenPos = data.position;
                 if (data.pointerCurrentRaycast.isValid)
                 {
                     screenPos = cam.WorldToScreenPoint(data.pointerCurrentRaycast.worldPosition);
                 }
 
+                // Calculate deltas.
                 data.delta = screenPos - data.position;
                 data.position = screenPos;
 
+                // Update Event System stuff, most of this was directly lifted from Unity's Input System Input Module.
                 ProcessPointerButton(pointer);
                 ProcessPointerMovement(pointer);
                 ProcessScrollWheel(pointer);

@@ -3,16 +3,18 @@ using UnityEngine;
 namespace HandyVR.Player.Hands
 {
     /// <summary>
-    /// Subclass for PlayerHand that manages the movement and collision.
+    /// Submodule for PlayerHand that manages the movement and collision.
     /// </summary>
     [System.Serializable]
     public class HandMovement
     {
+        [Tooltip("Magnitude of the rumble used when the hand is dragged along a surface")]
         [SerializeField] [Range(0.0f, 1.0f)] private float rumbleMagnitude;
+        [Tooltip("How much of the calculated force is applied per frame. Lower numbers result in a smoother result but can cause rubber-banding.")]
         [SerializeField] [Range(0.0f, 1.0f)] private float forceScaling = 1.0f;
 
         private PlayerHand hand;
-        private float lastBoundTime = 0.0f;
+        private float lastBoundTime;
 
         public void Init(PlayerHand hand)
         {
@@ -64,6 +66,10 @@ namespace HandyVR.Player.Hands
             hand.Input.Rumble(rumbleMagnitude, 0.0f);
         }
 
+        /// <summary>
+        /// If sufficient time has passed since we let go of the last binding, we can start colliding
+        /// with it again.
+        /// </summary>
         private void CheckIgnoreLastBindingCollision()
         {
             if (Time.fixedTime < lastBoundTime + 0.2f) return;
