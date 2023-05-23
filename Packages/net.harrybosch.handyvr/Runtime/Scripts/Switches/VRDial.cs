@@ -5,7 +5,7 @@ namespace HandyVR.Switches
 {
     [SelectionBase]
     [DisallowMultipleComponent]
-    [AddComponentMenu("HandyVR/Float Drivers/Slider", Reference.AddComponentMenuOrder.Submenu)]
+    [AddComponentMenu("HandyVR/Float Drivers/Dial", Reference.AddComponentMenuOrder.Submenu)]
     public sealed class VRDial : FloatDriver
     {
         private VRHandle handle;
@@ -38,7 +38,7 @@ namespace HandyVR.Switches
         {
             var rigidbody = handle.gameObject.GetOrAddComponent<Rigidbody>();
             rigidbody.mass = 0.02f;
-            rigidbody.drag = 6.0f;
+            rigidbody.angularDrag = 6.0f;
             rigidbody.useGravity = false;
             rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
             rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;

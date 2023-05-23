@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace HandyVR.Interactions
 {
@@ -11,26 +12,19 @@ namespace HandyVR.Interactions
     [AddComponentMenu("HandyVR/Handle", Reference.AddComponentMenuOrder.Components)]
     public sealed class VRHandle : VRBindable
     {
-        [Tooltip("Spring Constant used to match the handle position")]
-        [SerializeField] private float grabSpring = 500.0f;
-        [Tooltip("Damping Constant used to match the handle velocity")]
-        [SerializeField] private float grabDamper = 25.0f;
-        [Tooltip("Scaling to apply to force when converting it to torque")]
-        [SerializeField] private float grabAngle = 10.0f;
-
         private bool wasBound;
-        private Vector3 translationOffset;
-        private Quaternion rotationOffset;
+        private Vector3 lastPosition;
+        private Quaternion lastRotation;
         
         // Look for Rigidbody in parents as well.
         public override Rigidbody GetRigidbody() => GetComponentInParent<Rigidbody>();
 
         public override void OnBindingActivated(VRBinding binding)
         {
-            // Calculate the offset when we grab the handle, this stops the handle
-            // rocketing towards the hands actual position.
-            translationOffset = Handle.position - binding.position();
-            rotationOffset = Handle.rotation * Quaternion.Inverse(binding.rotation());
+            base.OnBindingActivated(binding);
+
+            lastPosition = binding.position();
+            lastRotation = binding.rotation();
         }
 
         private void FixedUpdate()
@@ -38,18 +32,21 @@ namespace HandyVR.Interactions
             if (!ActiveBinding) return;
 
             // Match the hands position through a simple spring damper, applied to the handles parent at the handles position.
-            var diff = (BindingPosition + translationOffset - Handle.position);
+            var diff = (BindingPosition - lastPosition);
             var pointVelocity = Rigidbody.GetPointVelocity(Handle.position);
-            var force = diff * grabSpring - pointVelocity * grabDamper;
+            var force = (diff / Time.deltaTime - pointVelocity) / Time.deltaTime;
             
-            Rigidbody.AddForceAtPosition(force, Handle.position, ForceMode.Acceleration);
+            Rigidbody.AddForce(force, ForceMode.Acceleration);
             
-            var delta = BindingRotation * rotationOffset * Quaternion.Inverse(Rigidbody.rotation);
+            var delta = BindingRotation * Quaternion.Inverse(lastRotation.normalized);
             delta.ToAngleAxis(out var angle, out var axis);
             
             // Calculate a torque to move the rigidbody to the target rotation with zero angular velocity.
-            var torque = axis * (angle * Mathf.Deg2Rad * grabSpring) - Rigidbody.angularVelocity * grabDamper;
-            Rigidbody.AddTorque(torque * grabAngle, ForceMode.Acceleration);
+            var torque = (axis * (angle * Mathf.Deg2Rad / Time.deltaTime) - Rigidbody.angularVelocity) / Time.deltaTime;
+            Rigidbody.AddTorque(torque, ForceMode.Acceleration);
+
+            lastPosition = BindingPosition;
+            lastRotation = BindingRotation;
         }
     }
 }
