@@ -172,7 +172,11 @@
       "version": "file:net.harrybosch.handyvr",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.inputsystem": "1.4.4",
+        "com.unity.xr.oculus": "3.2.3",
+        "com.unity.xr.openxr": "1.5.3"
+      }
     },
     "net.harrybosch.sharinator": {
       "version": "file:net.harrybosch.sharinator",
